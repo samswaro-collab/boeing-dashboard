@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Boeing — Sales Intelligence Dashboard 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bca:    #0055a5;
+  --bgs:    #00796b;
+  --bds:    #6a1b9a;
+  --spirit: #b85c00;
+  --intl:   #1565c0;
+  --wisk:   #c62828;
+  --avionx: #2e7d32;
+  --aurora: #0e7490;
+  --insitu: #3730a3;
+  --ett:    #b45309;
+  --ia:     #0f766e;
+  --navy:   #003366;
+  --gray-bg:#f4f6fa;
+  --border: #dce3ef;
+  --text:   #1a2340;
+  --sub:    #5a6a8a;
+  --white:  #ffffff;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--gray-bg);color:var(--text);font-size:13px;}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:54px;position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,0.3);}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.logo{background:#fff;color:var(--navy);font-weight:900;font-size:14px;letter-spacing:2px;padding:5px 12px;border-radius:4px;}
+.topbar h1{font-size:15px;font-weight:600;}
+.topbar-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.pill{border-radius:20px;padding:4px 13px;font-size:11px;font-weight:700;}
+.pill-green{background:#2e7d32;color:#fff;}
+.pill-date{background:rgba(255,255,255,.15);color:#fff;}
+
+/* ── LAYOUT ── */
+.shell{display:flex;min-height:calc(100vh - 54px);}
+
+/* ── LEFT SIDEBAR NAV ── */
+.sidenav{width:200px;min-width:200px;background:var(--navy);padding:18px 0;position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto;}
+.sidenav-section{padding:8px 16px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4);}
+.sidenav a{display:block;padding:8px 16px;font-size:12px;color:rgba(255,255,255,.75);text-decoration:none;border-left:3px solid transparent;transition:all .15s;}
+.sidenav a:hover{background:rgba(255,255,255,.08);color:#fff;border-left-color:rgba(255,255,255,.4);}
+.sidenav a.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:#fff;}
+.sidenav a .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;flex-shrink:0;}
+.dot-bca{background:var(--bca);}
+.dot-bgs{background:var(--bgs);}
+.dot-bds{background:var(--bds);}
+.dot-spirit{background:var(--spirit);}
+.dot-intl{background:var(--intl);}
+.dot-wisk{background:var(--wisk);}
+.dot-avionx{background:var(--avionx);}
+.dot-aurora{background:var(--aurora);}
+.dot-insitu{background:var(--insitu);}
+.dot-ett{background:var(--ett);}
+.dot-ia{background:var(--ia);}
+.dot-bte{background:#1a6fc4;}
+.sidenav hr{border:none;border-top:1px solid rgba(255,255,255,.1);margin:10px 16px;}
+
+/* ── MAIN CONTENT ── */
+.main{flex:1;padding:24px 28px;overflow-x:auto;}
+
+/* ── KPI BAR ── */
+.kpi-row{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;margin-bottom:22px;}
+.kpi{background:var(--white);border-radius:10px;padding:14px 12px;border:1.5px solid var(--border);text-align:center;}
+.kpi .val{font-size:22px;font-weight:800;color:var(--bca);line-height:1.1;}
+.kpi .klabel{font-size:10.5px;color:var(--sub);margin-top:4px;line-height:1.3;}
+.kpi .kicon{font-size:17px;margin-bottom:3px;}
+.kpi.red .val{color:#c62828;}
+.kpi.green .val{color:#2e7d32;}
+.kpi.orange .val{color:#b85c00;}
+
+/* ── DIVISION HEADER ── */
+.div-header{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:10px;margin-bottom:16px;color:#fff;}
+.div-header .div-badge{font-size:11px;font-weight:700;background:rgba(255,255,255,.2);border-radius:20px;padding:3px 12px;}
+.div-header h2{font-size:16px;font-weight:700;}
+.div-header .div-sub{font-size:11.5px;opacity:.85;margin-top:2px;}
+.bca-hdr{background:linear-gradient(135deg,#003f82,#0069c8);}
+.bgs-hdr{background:linear-gradient(135deg,#004d40,#00897b);}
+.bds-hdr{background:linear-gradient(135deg,#4a0072,#8e24aa);}
+.spirit-hdr{background:linear-gradient(135deg,#7f3f00,#d07000);}
+.intl-hdr{background:linear-gradient(135deg,#0d47a1,#1976d2);}
+.wisk-hdr{background:linear-gradient(135deg,#b71c1c,#e53935);}
+.avionx-hdr{background:linear-gradient(135deg,#1b5e20,#388e3c);}
+.aurora-hdr{background:linear-gradient(135deg,#065a6e,#0e9fbf);}
+.insitu-hdr{background:linear-gradient(135deg,#1e1a6e,#4f46a3);}
+.ett-hdr{background:linear-gradient(135deg,#7c2d12,#d97706);}
+.ia-hdr{background:linear-gradient(135deg,#064e3b,#059669);}
+.bte-sub{background:linear-gradient(135deg,#003f82,#1d6fc5);border-radius:10px;padding:12px 18px;margin-bottom:16px;color:#fff;display:flex;align-items:center;gap:10px;}
+.bte-sub h3{font-size:14px;font-weight:700;}
+.bte-sub .bte-badge{font-size:11px;font-weight:700;background:rgba(255,255,255,.2);border-radius:20px;padding:2px 10px;}
+
+/* ── CARDS ── */
+.card{background:var(--white);border-radius:10px;border:1.5px solid var(--border);padding:18px 20px;margin-bottom:16px;}
+.card-title{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:13px;display:flex;align-items:center;gap:7px;}
+
+/* ── LOCATION GRID ── */
+.loc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:13px;margin-bottom:16px;}
+.loc-card{background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:15px 17px;border-top:4px solid var(--bca);}
+.loc-card.bgs-top{border-top-color:var(--bgs);}
+.loc-card.bds-top{border-top-color:var(--bds);}
+.loc-card.spirit-top{border-top-color:var(--spirit);}
+.loc-card.intl-top{border-top-color:var(--intl);}
+.loc-card.wisk-top{border-top-color:var(--wisk);}
+.loc-card.avionx-top{border-top-color:var(--avionx);}
+.loc-card.aurora-top{border-top-color:var(--aurora);}
+.loc-card.insitu-top{border-top-color:var(--insitu);}
+.loc-card.ett-top{border-top-color:var(--ett);}
+.loc-card.ia-top{border-top-color:var(--ia);}
+.loc-card h3{font-size:13.5px;font-weight:700;color:var(--navy);}
+.loc-card .lsub{font-size:11px;color:var(--sub);margin:2px 0 9px;}
+.loc-count{float:right;background:var(--bca);color:#fff;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;}
+.loc-count.bgs-c{background:var(--bgs);}
+.loc-count.bds-c{background:var(--bds);}
+.loc-count.spirit-c{background:var(--spirit);}
+.loc-count.intl-c{background:var(--intl);}
+.loc-count.wisk-c{background:var(--wisk);}
+.loc-count.aurora-c{background:var(--aurora);}
+.loc-count.insitu-c{background:var(--insitu);}
+.loc-count.ett-c{background:var(--ett);}
+.loc-count.ia-c{background:var(--ia);}
+
+/* ── TABLES ── */
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{background:var(--navy);color:#fff;padding:8px 12px;text-align:left;font-weight:600;font-size:11.5px;}
+td{padding:8px 12px;border-bottom:1px solid #eef1f9;vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#f3f7fd;}
+tr.total-row td{background:#e8f0fb;font-weight:700;}
+.th-bgs{background:var(--bgs) !important;}
+.th-bds{background:var(--bds) !important;}
+.th-spirit{background:var(--spirit) !important;}
+.th-intl{background:var(--intl) !important;}
+.th-wisk{background:var(--wisk) !important;}
+.th-avionx{background:var(--avionx) !important;}
+.th-aurora{background:var(--aurora) !important;}
+.th-insitu{background:var(--insitu) !important;}
+.th-ett{background:var(--ett) !important;}
+.th-ia{background:var(--ia) !important;}
+.warn-ett{background:#fff7ed;border:1.5px solid #fed7aa;color:#7c2d12;}
+.warn-ia{background:#ecfdf5;border:1.5px solid #6ee7b7;color:#064e3b;}
+
+/* ── TAGS ── */
+.tag{display:inline-block;border-radius:10px;padding:2px 9px;font-size:11px;font-weight:600;}
+.t-red{background:#fff0f0;color:#c62828;}
+.t-yellow{background:#fffde7;color:#b45309;}
+.t-green{background:#e8f5e9;color:#2e7d32;}
+.t-blue{background:#e8f0fb;color:#0044aa;}
+.t-purple{background:#f3e5f5;color:#6a1b9a;}
+.t-orange{background:#fff3e0;color:#b85c00;}
+.t-teal{background:#e0f7fa;color:#065a6e;}
+.t-indigo{background:#ede9fe;color:#3730a3;}
+
+/* ── CHIPS ── */
+.chip-wrap{display:flex;flex-wrap:wrap;gap:6px;}
+.chip{background:#e8f0fb;color:var(--navy);border-radius:20px;padding:3px 11px;font-size:11.5px;border:1px solid #c5d8f5;}
+.chip.hot{background:#fff3e0;color:#b45309;border-color:#ffd180;}
+.chip.tech{background:#f3e5f5;color:#6a1b9a;border-color:#ce93d8;}
+.chip.green{background:#e8f5e9;color:#2e7d32;border-color:#a5d6a7;}
+
+/* ── PROGRESS ── */
+.prog-row{margin-bottom:9px;}
+.prog-label{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px;}
+.prog-track{background:#e4eaf5;border-radius:99px;height:7px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--bca),#3a8fe8);}
+.prog-fill.bgs{background:linear-gradient(90deg,var(--bgs),#26a69a);}
+.prog-fill.spirit{background:linear-gradient(90deg,var(--spirit),#ef8c00);}
+
+/* ── ACTION ITEMS ── */
+.action-list{display:flex;flex-direction:column;gap:9px;}
+.action-item{display:flex;align-items:flex-start;gap:11px;background:var(--gray-bg);border-radius:8px;padding:10px 13px;border-left:4px solid var(--bca);}
+.action-item.high{border-left-color:#c62828;}
+.action-item.med{border-left-color:#f57f17;}
+.action-item.low{border-left-color:#2e7d32;}
+.action-num{background:var(--bca);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.action-item.high .action-num{background:#c62828;}
+.action-item.med .action-num{background:#f57f17;}
+.action-text{font-size:12px;line-height:1.55;}
+
+/* ── SECTION DIVIDER ── */
+.sec-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--sub);margin:6px 0 10px;}
+.section-gap{margin-bottom:32px;}
+
+/* ── WARNING BOX ── */
+.warn-box{border-radius:8px;padding:9px 14px;font-size:12px;margin-bottom:13px;}
+.warn-blue{background:#e8f0fb;border:1.5px solid #90b8f8;color:#003066;}
+.warn-purple{background:#f3e5f5;border:1.5px solid #ce93d8;color:#4a0072;}
+.warn-green{background:#e8f5e9;border:1.5px solid #a5d6a7;color:#1b5e20;}
+.warn-orange{background:#fff3e0;border:1.5px solid #ffcc80;color:#7f3f00;}
+.warn-teal{background:#e0f7fa;border:1.5px solid #80deea;color:#01579b;}
+.warn-indigo{background:#ede9fe;border:1.5px solid #c4b5fd;color:#1e1a6e;}
+
+/* ── GRID HELPERS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g12{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;}
+
+/* ── CHART WRAP ── */
+.cw{position:relative;height:220px;}
+.cw-tall{position:relative;height:280px;}
+
+/* ── ANCHOR OFFSET FIX (sticky header) ── */
+.section-anchor{display:block;height:70px;margin-top:-70px;visibility:hidden;}
+
+/* ── TOP 5 SKILLS CARDS ── */
+.top5-head{font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin:22px 0 12px;}
+.top5-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px;}
+@media(max-width:900px){.top5-grid{grid-template-columns:repeat(2,1fr);}}
+.t5w{background:#fff;border-radius:10px;padding:14px 14px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border-top:4px solid var(--c,#0055a5);position:relative;}
+.t5w .t5rank{font-size:10px;font-weight:800;color:var(--c,#0055a5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.t5w .t5name{font-size:12px;font-weight:700;color:#0f172a;line-height:1.35;margin-bottom:5px;}
+.t5w .t5sub{font-size:11px;color:#64748b;line-height:1.4;margin-bottom:6px;}
+.t5w .t5sites{font-size:10px;color:#94a3b8;font-style:italic;}
+
+/* ── PAGE FOOTER ── */
+#page-footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;padding:14px;font-size:11.5px;}
+
+@media(max-width:900px){
+  .sidenav{display:none;}
+  .kpi-row{grid-template-columns:repeat(3,1fr);}
+  .g2,.g3,.g12{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">BOEING</div>
+    <div>
+      <h1>Sales Intelligence Dashboard &nbsp;·&nbsp; 2026</h1>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="pill pill-green">✅ Clearance Roles Excluded</div>
+    <div class="pill pill-date" id="topbar-date">📅 Loading…</div>
+    <div class="pill pill-green">🏆 Approved Boeing Supplier</div>
+  </div>
+</div>
+
+<div class="shell">
+
+<!-- ── SIDE NAV ── -->
+<nav class="sidenav">
+  <div class="sidenav-section">Overview</div>
+  <a href="#summary" class="active">📊 Summary KPIs</a>
+  <a href="#contacts">👤 Key Contacts</a>
+  <a href="#actions">🎯 Sales Actions</a>
+  <a href="#skills">⚡ Fast-Sell Skills</a>
+  <hr/>
+  <div class="sidenav-section">BCA</div>
+  <a href="#bca"><span class="dot dot-bca"></span>Commercial Airplanes</a>
+  <a href="#bte"><span class="dot dot-bte"></span>BT&amp;E — Test &amp; Eval</a>
+  <hr/>
+  <div class="sidenav-section">BGS</div>
+  <a href="#bgs"><span class="dot dot-bgs"></span>Global Services</a>
+  <hr/>
+  <div class="sidenav-section">BDS</div>
+  <a href="#bds"><span class="dot dot-bds"></span>Defense &amp; Space</a>
+  <hr/>
+  <div class="sidenav-section">Spirit (Boeing)</div>
+  <a href="#spirit"><span class="dot dot-spirit"></span>Spirit — Wichita KS</a>
+  <hr/>
+  <div class="sidenav-section">International</div>
+  <a href="#india"><span class="dot dot-intl"></span>Boeing India (BIETC)</a>
+  <a href="#brazil"><span class="dot dot-intl"></span>Boeing Brazil (BETC)</a>
+  <hr/>
+  <div class="sidenav-section">Subsidiaries</div>
+  <a href="#wisk"><span class="dot dot-wisk"></span>Wisk Aero</a>
+  <a href="#avionx"><span class="dot dot-avionx"></span>AvionX / MRO Digital</a>
+  <a href="#aurora"><span class="dot dot-aurora"></span>Aurora Flight Sciences</a>
+  <a href="#insitu"><span class="dot dot-insitu"></span>Insitu (UAS)</a>
+  <hr/>
+  <div class="sidenav-section">Horizontal Orgs</div>
+  <a href="#ett"><span class="dot dot-ett"></span>ET&amp;T — Eng. Test &amp; Tech</a>
+  <a href="#ia"><span class="dot dot-ia"></span>I&amp;A — Info &amp; Analytics</a>
+  <hr/>
+  <div class="sidenav-section">Reference</div>
+  <a href="#certs">🏅 Certifications</a>
+  <a href="#cyient">🏆 Proof Points</a>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+<!-- ═══════════════════════════════════════════════
+     SUMMARY KPIs
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="summary"></a>
+<div class="kpi-row">
+  <div class="kpi red"><div class="kicon">📋</div><div class="val">~1,700+</div><div class="klabel">Total Est. Open Roles Across All Divisions</div></div>
+  <div class="kpi orange"><div class="kicon">⏳</div><div class="val">~1,200+</div><div class="klabel">Est. Unfilled (Non-Clearance)</div></div>
+  <div class="kpi green"><div class="kicon">✈️</div><div class="val">42/mo</div><div class="klabel">737 MAX Production Rate</div></div>
+  <div class="kpi"><div class="kicon">🏭</div><div class="val">100–140</div><div class="klabel">New BCA Hires/Week</div></div>
+  <div class="kpi"><div class="kicon">🏢</div><div class="val">13</div><div class="klabel">Boeing Orgs Covered (incl. ET&amp;T, I&amp;A, BT&amp;E)</div></div>
+  <div class="kpi"><div class="kicon">📍</div><div class="val">18+</div><div class="klabel">Locations Mapped</div></div>
+  <div class="kpi green"><div class="kicon">🏆</div><div class="val">Approved</div><div class="klabel">Approved Boeing Supplier</div></div>
+</div>
+
+<!-- OVERVIEW CHARTS -->
+<div class="g12" style="margin-bottom:20px;">
+  <div class="card">
+    <div class="card-title">📊 Open Positions by Location — All Divisions (Non-Clearance)</div>
+    <div class="cw-tall"><canvas id="locChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">🏢 Open Roles by Division</div>
+    <div class="cw" style="height:180px;"><canvas id="divChart"></canvas></div>
+    <div style="margin-top:14px;">
+      <div class="prog-row"><div class="prog-label"><span>BCA (Commercial)</span><span style="color:var(--sub);">~921 open</span></div><div class="prog-track"><div class="prog-fill" style="width:72%;"></div></div></div>
+      <div class="prog-row"><div class="prog-label"><span>BGS (Global Services)</span><span style="color:var(--sub);">~50 open</span></div><div class="prog-track"><div class="prog-fill bgs" style="width:12%;"></div></div></div>
+      <div class="prog-row"><div class="prog-label"><span>BDS (Non-clearance pockets)</span><span style="color:var(--sub);">~75 open</span></div><div class="prog-track"><div class="prog-fill" style="width:10%;background:linear-gradient(90deg,var(--bds),#ba68c8);"></div></div></div>
+      <div class="prog-row"><div class="prog-label"><span>Spirit AeroSystems (Wichita)</span><span style="color:var(--sub);">~107 open</span></div><div class="prog-track"><div class="prog-fill spirit" style="width:16%;"></div></div></div>
+      <div class="prog-row"><div class="prog-label"><span>International (India + Brazil)</span><span style="color:var(--sub);">~140+ open</span></div><div class="prog-track"><div class="prog-fill" style="width:18%;background:linear-gradient(90deg,var(--intl),#42a5f5);"></div></div></div>
+      <div class="prog-row"><div class="prog-label"><span>Subsidiaries (Wisk/AvionX/Aurora/Insitu)</span><span style="color:var(--sub);">~80+ open</span></div><div class="prog-track"><div class="prog-fill" style="width:10%;background:linear-gradient(90deg,var(--aurora),#38bdf8);"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     KEY CONTACTS
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="contacts"></a>
+<div class="card section-gap">
+  <div class="card-title">👤 Key Boeing Hiring Contacts — Outreach Map</div>
+  <table>
+    <thead><tr><th>Name</th><th>Role</th><th>Division / Site</th><th>Why Contact</th><th>LinkedIn</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Case McGee</strong></td><td>Head of Global Talent Acquisition &amp; Executive Search</td><td>Enterprise / All Sites</td><td><span class="tag t-red">Enterprise Deal</span> — preferred vendor partnership across all BCA programs</td><td><a href="https://www.linkedin.com/in/case-mcgee/" style="color:var(--bca);">case-mcgee</a></td></tr>
+      <tr><td><strong>Lisa Gootman</strong></td><td>Business Lead, Talent Acquisition</td><td>BCA — Puget Sound (Everett/Renton)</td><td><span class="tag t-red">North Line NOW</span> — 737 manufacturing contractor fills</td><td><a href="https://www.linkedin.com/in/lgootman/" style="color:var(--bca);">lgootman</a></td></tr>
+      <tr><td><strong>Maribeth Sanbe</strong></td><td>Lead TA Advisor / Recruiter</td><td>BCA — Puget Sound</td><td><span class="tag t-red">737 Renton &amp; Everett</span> — fills assembler &amp; engineer roles directly</td><td><a href="https://www.linkedin.com/in/maribeth-sanbe-a25b0434/" style="color:var(--bca);">maribeth-sanbe</a></td></tr>
+      <tr><td><strong>Alexandria Johnson</strong></td><td>TA Team Lead</td><td>BCA — North Charleston, SC</td><td><span class="tag t-yellow">787 Ramp</span> — leads TA for 787 production expansion</td><td><a href="https://www.linkedin.com/in/alexandria-johnson-140760a5/" style="color:var(--bca);">alexandria-johnson</a></td></tr>
+      <tr><td><strong>Jeanne Besselman</strong></td><td>Talent Acquisition Advisor</td><td>BCA (Multiple)</td><td><span class="tag t-yellow">787 / BCA Roles</span> — active TA advisor for commercial programs</td><td><a href="https://www.linkedin.com/in/jeannebesselman/" style="color:var(--bca);">jeannebesselman</a></td></tr>
+      <tr><td><strong>Vaishnavi Kulkarni</strong></td><td>TA Advisor</td><td>BCA — Seattle / Engineering</td><td><span class="tag t-blue">Engineering</span> — CATIA, Systems Eng, Software roles</td><td><a href="https://www.linkedin.com/in/vaishnavi-kulkarni09/" style="color:var(--bca);">vaishnavi-kulkarni09</a></td></tr>
+      <tr><td><strong>Jordan Bush</strong></td><td>Talent Acquisition</td><td>BCA — Seattle</td><td><span class="tag t-blue">IT &amp; Software</span> — Software Dev, Data Science roles</td><td><a href="https://www.linkedin.com/in/talentacquisitionator/" style="color:var(--bca);">talentacquisitionator</a></td></tr>
+      <tr><td><strong>BGS Dallas TA</strong></td><td>TA Partner — BGS Supply Chain</td><td>BGS — Dallas, TX</td><td><span class="tag t-green">BGS Warm Path</span> — use DLM BGS contract as intro; ask for intro to TA lead</td><td>Search: "Boeing BGS Dallas Talent Acquisition"</td></tr>
+      <tr><td><strong>BDS St. Louis TA</strong></td><td>TA Partner — BDS HQ (SAP/IT/Finance)</td><td>BDS — St. Louis, MO</td><td><span class="tag t-purple">HQ Expansion</span> — BDS HQ returned Feb 2026; SAP/Finance support staff expanding</td><td>Search: "Boeing Defense St. Louis Talent Acquisition"</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TARGETED SALES ACTIONS
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="actions"></a>
+<div class="card section-gap">
+  <div class="card-title">🎯 Targeted Sales Actions — As Approved Boeing Supplier</div>
+  <div class="warn-green" style="margin-bottom:13px;">✅ <strong>Lead every conversation with:</strong> Boeing Performance Excellence Award · DLM × Boeing Global Services production contract (Feb 2025) · 50+ engineers ramped in Seattle area in 2–3 months · AS9100 &amp; NADCAP certified</div>
+  <div class="action-list">
+    <div class="action-item high"><div class="action-num">1</div><div class="action-text"><strong>🔴 BCA — North Line Everett (Opens mid-2026)</strong><br>Boeing's 4th 737 MAX line urgently needs 1st/2nd/3rd shift Manufacturing Managers, Assemblers &amp; Industrial Engineers. Zero incumbents — must fill from scratch.<br><span style="color:var(--bca);">📌 Contact: Lisa Gootman (lgootman) · Maribeth Sanbe (maribeth-sanbe)</span><br><span style="color:#c62828;font-size:11px;">⚡ Fast-sell: Lean Mfg · Six Sigma · 737 assembly experience · Shift supervision</span></div></div>
+    <div class="action-item high"><div class="action-num">2</div><div class="action-text"><strong>🔴 BCA — Enterprise TA Relationship via Case McGee</strong><br>Engage Head of Global TA to position as preferred contractor pipeline partner across ALL BCA programs — not just one site. Lead with PE Award + DLM contract + ramp speed proof.<br><span style="color:var(--bca);">📌 Contact: Case McGee (case-mcgee)</span></div></div>
+    <div class="action-item high"><div class="action-num">3</div><div class="action-text"><strong>🔴 BCA — 787 North Charleston</strong><br>787 ramping to 10/month. Target Quality Engineers, Structural Repair, and CATIA Design roles.<br><span style="color:var(--bca);">📌 Contact: Alexandria Johnson · Jeanne Besselman</span><br><span style="color:#c62828;font-size:11px;">⚡ Fast-sell: Composites · AS9100 · Structural repair · CATIA V5/V6</span></div></div>
+    <div class="action-item high"><div class="action-num">4</div><div class="action-text"><strong>🔴 BDS — St. Louis HQ (First-Mover Opportunity)</strong><br>BDS HQ returned to St. Louis in Feb 2026. Support functions (SAP Finance FI/CO, DevSecOps, Supply Chain Data Stewards) expanding fast.<br><span style="color:#c62828;font-size:11px;">⚡ Fast-sell: SAP FI/CO · DevSecOps · Data Architect · Supply Chain Data Steward</span></div></div>
+    <div class="action-item med"><div class="action-num">5</div><div class="action-text"><strong>🟡 BCA — Seattle Engineering — Lead with Ramp Speed</strong><br>~526 open non-clearance roles. Pitch proof: <em>"Cyient ramped 50+ engineers in the Seattle area in under 3 months."</em><br><span style="color:var(--bca);">📌 Contact: Vaishnavi Kulkarni · Jordan Bush</span><br><span style="color:#c62828;font-size:11px;">⚡ Fast-sell: CATIA · Systems Engineering · Wire Design · Software Dev Eng.</span></div></div>
+    <div class="action-item med"><div class="action-num">6</div><div class="action-text"><strong>🟡 BGS — Leverage DLM Contract for Dallas / Denver / San Diego</strong><br>DLM's Feb 2025 BGS production contract is the warm intro. Ask BGS account contact for referral to TA in Dallas, Denver, and San Diego.<br><span style="color:#c62828;font-size:11px;">⚡ Talking point: "We already deliver precision parts to your BGS team — let us extend that to your workforce needs."</span></div></div>
+    <div class="action-item med"><div class="action-num">7</div><div class="action-text"><strong>🟡 Spirit AeroSystems Wichita — New Relationship, Warm Boeing Umbrella</strong><br>Spirit became fully Boeing-owned Dec 2025. ~107 open roles in Wichita. Use Boeing supplier status as the opening.<br><span style="color:#c62828;font-size:11px;">⚡ Fast-sell: Manufacturing Engineer · Industrial Engineer · Quality Engineer · Structural Analysis</span></div></div>
+    <div class="action-item med"><div class="action-num">8</div><div class="action-text"><strong>🟡 Aurora Flight Sciences — Tech Pubs &amp; Structures Entry Point</strong><br>Aurora (Cambridge MA) has ongoing needs for technical publications (DARPA/USAF programs), structures engineers, and autonomy SW engineers. Use Boeing supplier umbrella as intro.<br><span style="color:#c62828;font-size:11px;">⚡ Fast-sell: Tech Pubs (IETM/S1000D) · Structures · DO-178C SW</span></div></div>
+    <div class="action-item low"><div class="action-num">9</div><div class="action-text"><strong>🟢 Boeing India (BIETC) — Bengaluru Offshore Engineering</strong><br>5,500+ workforce at BIETC Bengaluru with 130 open roles. AI/ML, SAP, Full Stack, Systems Engineering. Position as local delivery partner for global programs.<br><span style="color:#c62828;font-size:11px;">⚡ Fast-sell: AI/ML · SAP · Java FSD · Systems Engineer · CATIA (structural)</span></div></div>
+    <div class="action-item low"><div class="action-num">10</div><div class="action-text"><strong>🟢 Insitu (Bingen WA) — UAS Engineering &amp; Tech Pubs</strong><br>Insitu makes ScanEagle and RQ-21 Blackjack for US Navy/USMC. Non-clearance mechanical, manufacturing, and technical publications roles available in Bingen WA.<br><span style="color:#c62828;font-size:11px;">⚡ Fast-sell: Mechanical Engineer · Tech Pubs · Manufacturing Engineer</span></div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     FAST-SELL SKILLS
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="skills"></a>
+<div class="card section-gap">
+  <div class="card-title">⚡ Fast-Sell Skills — What Boeing Needs That Cyient Can Deliver Now</div>
+  <table>
+    <thead><tr><th>Skill / Role</th><th>Division / Program</th><th>Location &amp; Dept</th><th>Est. Open</th><th>Why It Sells Fast</th><th>Fit</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Manufacturing Engineer</strong><br><span style="font-size:11px;color:var(--sub);">Supply Chain Integration · All levels</span></td><td>BCA · 737 MAX North Line</td><td><strong>Everett, WA</strong></td><td><strong style="color:#c62828;">~15–20</strong></td><td>North Line launch — no incumbents, must fill before midsummer</td><td><span class="tag t-red">🔴 Active Req</span></td></tr>
+      <tr><td><strong>Quality Engineer (AS9100)</strong><br><span style="font-size:11px;color:var(--sub);">QE / Supplier QE / NDT</span></td><td>BCA + Spirit · All Programs</td><td><strong>Everett · Kent · Renton WA · N. Charleston SC · Wichita KS</strong></td><td><strong style="color:#c62828;">~77+ nationally</strong></td><td>FAA mandates QE at every rate increase — scales 1:1 with production ramp</td><td><span class="tag t-red">🔴 Sustained</span></td></tr>
+      <tr><td><strong>CATIA V5/V6 Structures Design Eng.</strong></td><td>BCA · 787 / 777X</td><td><strong>N. Charleston SC · Seattle WA · Everett WA</strong></td><td><strong style="color:#b45309;">~20–30</strong></td><td>787 fuselage ramp + 777X cert — CATIA hard to source locally in SC</td><td><span class="tag t-yellow">🟡 Core Skill</span></td></tr>
+      <tr><td><strong>Systems / Safety Engineer</strong></td><td>BCA · 777X / 777-8F</td><td><strong>Everett WA · Seattle WA</strong></td><td><strong style="color:#b45309;">~25–35</strong></td><td>777X FAA certification 2026 — safety &amp; integration engineers under deadline</td><td><span class="tag t-yellow">🟡 Strong Fit</span></td></tr>
+      <tr><td><strong>Software Development Engineer</strong></td><td>BCA / BT&amp;E / BGS · Digital Eng.</td><td><strong>Seattle WA · Aurora CO (BGS)</strong></td><td><strong style="color:#b45309;">~40+ total</strong></td><td>Full-Stack (BGS Aurora) + flight test data systems (BCA Seattle) both active</td><td><span class="tag t-yellow">🟡 Good Fit</span></td></tr>
+      <tr><td><strong>SAP Finance FI/CO Analyst</strong></td><td>BDS · Finance / IT</td><td><strong>St. Louis, MO</strong></td><td><strong style="color:#b45309;">~5–8</strong></td><td>BDS HQ just returned to St. Louis — support functions building out</td><td><span class="tag t-purple">🟣 BDS Pocket</span></td></tr>
+      <tr><td><strong>Structural Analysis / Repair Engineer</strong></td><td>BCA · 787 Dreamliner</td><td><strong>N. Charleston, SC</strong></td><td><strong style="color:#b45309;">~8–12</strong></td><td>787 rate ramp; req open since Jan 2026 and still unfilled</td><td><span class="tag t-yellow">🟡 Good Fit</span></td></tr>
+      <tr><td><strong>Technical Publications / ILS</strong></td><td>Aurora · Insitu · BCA</td><td><strong>Cambridge MA · Bingen WA · Seattle WA</strong></td><td><strong style="color:#b45309;">~10–15</strong></td><td>Aurora/Insitu DARPA + Navy programs generate heavy ILS/tech pubs demand; low-clearance barrier</td><td><span class="tag t-teal">🩵 New Entry</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION: BCA
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="bca"></a>
+<div class="div-header bca-hdr">
+  <div><div class="div-badge">✈️ BCA</div></div>
+  <div>
+    <h2>Boeing Commercial Airplanes</h2>
+    <div class="div-sub">Renton WA · Everett WA · Seattle WA · North Charleston SC · California · Jacksonville FL · Chicago IL</div>
+  </div>
+</div>
+
+<div class="warn-blue">📌 <strong>Context:</strong> FAA approved 737 MAX at 42/month. New 4th production line (North Line) opening in Everett mid-2026. 787 ramping to 10/month in South Carolina. 777X targeting FAA cert in 2026. Boeing hiring 100–140 workers/week. Pacific NW workforce: 34,000+.</div>
+
+<div class="loc-grid">
+  <div class="loc-card"><h3>Renton, WA <span class="loc-count">~180+ open</span></h3><div class="lsub">737 MAX Final Assembly Hub</div><div class="chip-wrap"><span class="chip hot">Manufacturing Mgr</span><span class="chip hot">Industrial Engineer</span><span class="chip">Assembler/Installer</span><span class="chip">Quality Engineer</span><span class="chip">Shift Manager</span><span class="chip">Supply Chain Coord.</span></div></div>
+  <div class="loc-card"><h3>Everett, WA <span class="loc-count">~200+ open</span></h3><div class="lsub">NEW 737 North Line + 777X Program</div><div class="chip-wrap"><span class="chip hot">Mfg Eng. (Supply Chain)</span><span class="chip hot">North Line Shift Mgrs</span><span class="chip">Systems/Safety Engineer</span><span class="chip">Assembler/Installer</span><span class="chip">CNC Programmer</span><span class="chip">Software Engineer</span></div></div>
+  <div class="loc-card"><h3>Seattle, WA <span class="loc-count">~526 open</span></h3><div class="lsub">Engineering, IT &amp; Corporate</div><div class="chip-wrap"><span class="chip tech">Software Dev. Eng.</span><span class="chip tech">Data Scientist</span><span class="chip">Structural Design Eng.</span><span class="chip">Wire Design Eng.</span><span class="chip">Systems Engineer</span><span class="chip">Project Manager</span></div></div>
+  <div class="loc-card"><h3>N. Charleston, SC <span class="loc-count">~62+ open</span></h3><div class="lsub">787 Dreamliner Production &amp; Final Assembly</div><div class="chip-wrap"><span class="chip hot">CATIA Structures Eng.</span><span class="chip hot">Quality Engineer</span><span class="chip">Fabrication Specialist</span><span class="chip">Assembler Team Lead</span><span class="chip">Structural Repair Eng.</span></div></div>
+  <div class="loc-card"><h3>California <span class="loc-count">~323 open</span></h3><div class="lsub">El Segundo, Long Beach &amp; other CA sites</div><div class="chip-wrap"><span class="chip">Systems Engineer</span><span class="chip tech">Software Engineer</span><span class="chip">Manufacturing Eng.</span><span class="chip">Supply Chain Analyst</span></div></div>
+  <div class="loc-card"><h3>Chicago, IL <span class="loc-count">~19 open</span></h3><div class="lsub">Corporate HQ — Finance, HR, Strategy</div><div class="chip-wrap"><span class="chip">Finance/Accounting</span><span class="chip">HR Talent Acquisition</span><span class="chip">Project Manager</span></div></div>
+</div>
+
+<div class="card section-gap">
+  <div class="card-title">📊 BCA Open vs. Filled by Location</div>
+  <table>
+    <thead><tr><th>Location</th><th>Program</th><th>Est. Total Open</th><th>Est. Filled</th><th>Est. Still Open</th><th>Urgency</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Seattle, WA</strong></td><td>Engineering &amp; IT (cross-program)</td><td>~526</td><td>~175</td><td><strong>~351</strong></td><td><span class="tag t-red">🔴 High</span></td></tr>
+      <tr><td><strong>Everett, WA</strong></td><td>North Line (737) + 777X</td><td>~200+</td><td>~50</td><td><strong>~150+</strong></td><td><span class="tag t-red">🔴 Very High</span></td></tr>
+      <tr><td><strong>Renton, WA</strong></td><td>737 MAX Assembly</td><td>~180</td><td>~65</td><td><strong>~115</strong></td><td><span class="tag t-red">🔴 High</span></td></tr>
+      <tr><td><strong>California</strong></td><td>Various commercial</td><td>~323</td><td>~90</td><td><strong>~233</strong></td><td><span class="tag t-yellow">🟡 Med-High</span></td></tr>
+      <tr><td><strong>N. Charleston, SC</strong></td><td>787 Dreamliner</td><td>~62</td><td>~23</td><td><strong>~39</strong></td><td><span class="tag t-yellow">🟡 Med-High</span></td></tr>
+      <tr><td><strong>Jacksonville, FL</strong></td><td>Maintenance &amp; Modification</td><td>~30</td><td>~10</td><td><strong>~20</strong></td><td><span class="tag t-green">🟢 Moderate</span></td></tr>
+      <tr><td><strong>Chicago, IL</strong></td><td>Corporate</td><td>~19</td><td>~6</td><td><strong>~13</strong></td><td><span class="tag t-green">🟢 Moderate</span></td></tr>
+      <tr class="total-row"><td><strong>BCA TOTAL</strong></td><td></td><td><strong>~1,340</strong></td><td><strong>~419</strong></td><td><strong>~921</strong></td><td><span class="tag t-red">🔴 Major Opp.</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="top5-head">Top 5 In-Demand Skills / Functions — Boeing Commercial Airplanes</p>
+<div class="top5-grid">
+  <div class="t5w" style="--c:#0055a5">
+    <div class="t5rank">#1 In Demand</div>
+    <div class="t5name">Manufacturing Engineer</div>
+    <div class="t5sub">737 North Line launch, Lean/Six Sigma, assembly process eng., supply chain integration</div>
+    <div class="t5sites">Everett WA · Renton WA</div>
+  </div>
+  <div class="t5w" style="--c:#0069c8">
+    <div class="t5rank">#2 In Demand</div>
+    <div class="t5name">Quality Engineer (AS9100)</div>
+    <div class="t5sub">FAA-mandated at every rate increase, Supplier QE, NDT, first article inspection</div>
+    <div class="t5sites">Everett WA · N. Charleston SC · Renton WA</div>
+  </div>
+  <div class="t5w" style="--c:#003f82">
+    <div class="t5rank">#3 In Demand</div>
+    <div class="t5name">CATIA V5/V6 Structures Design Eng.</div>
+    <div class="t5sub">787 fuselage ramp, 777X payload design, senior/expert levels actively recruited</div>
+    <div class="t5sites">N. Charleston SC · Seattle WA · Everett WA</div>
+  </div>
+  <div class="t5w" style="--c:#1a6fc4">
+    <div class="t5rank">#4 In Demand</div>
+    <div class="t5name">Systems / Safety Engineer</div>
+    <div class="t5sub">777X FAA certification deadline 2026, airplane-level integration, safety assurance</div>
+    <div class="t5sites">Everett WA · Seattle WA</div>
+  </div>
+  <div class="t5w" style="--c:#2563a8">
+    <div class="t5rank">#5 In Demand</div>
+    <div class="t5name">Software Development Engineer</div>
+    <div class="t5sub">Flight test data systems, BCA Digital Engineering, embedded SW, full-stack</div>
+    <div class="t5sites">Seattle WA · Everett WA</div>
+  </div>
+</div>
+
+<!-- BT&E SUB-SECTION (under BCA) -->
+<a class="section-anchor" id="bte"></a>
+<div class="bte-sub">
+  <div><div class="bte-badge">🧪 BT&amp;E</div></div>
+  <div>
+    <h3>Boeing Test &amp; Evaluation (BT&amp;E)</h3>
+    <div style="font-size:11.5px;opacity:.85;margin-top:2px;">Under BCA · Everett WA · Moses Lake WA · Edwards AFB CA · Yuma AZ</div>
+  </div>
+</div>
+
+<div class="warn-blue" style="margin-bottom:13px;">📌 <strong>Context:</strong> BT&amp;E is Boeing's flight test and evaluation arm under BCA. It operates the 777X test campaign (N779XX, N778XX), the 737-10 certification effort, and 787-10 rate validation flights. BT&amp;E is instrumenting, flying, and certifying all new commercial variants simultaneously in 2026 — creating sustained demand for instrumentation engineers, flight test data analysts, and avionics integration specialists. Moses Lake WA is the primary ferry/crew base; Edwards AFB is used for performance envelope expansion.</div>
+
+<div class="loc-grid">
+  <div class="loc-card"><h3>Everett, WA <span class="loc-count">~20+ open</span></h3><div class="lsub">BT&amp;E HQ — 777X &amp; 777-8F Test Engineering</div><div class="chip-wrap"><span class="chip hot">Flight Test Engineer (777X)</span><span class="chip hot">Avionics Systems Test Eng.</span><span class="chip">Systems Integration Eng.</span><span class="chip tech">Flight Test Data Analyst</span></div></div>
+  <div class="loc-card"><h3>Moses Lake, WA <span class="loc-count">~8+ open</span></h3><div class="lsub">Flight Test Operations — Ferry &amp; Crew Base</div><div class="chip-wrap"><span class="chip">Flight Test Ops Specialist</span><span class="chip">Test Ground Support Eng.</span><span class="chip">Aircraft Maintenance (Test)</span></div></div>
+  <div class="loc-card"><h3>Edwards AFB / Yuma, AZ <span class="loc-count">~5+ open</span></h3><div class="lsub">Performance envelope &amp; systems validation</div><div class="chip-wrap"><span class="chip hot">FTI Systems Engineer</span><span class="chip">Test Instrumentation Technician</span></div></div>
+</div>
+
+<div class="card section-gap">
+  <div class="card-title" style="color:var(--bca);">📋 BT&amp;E — Open Roles &amp; Fit</div>
+  <table>
+    <thead><tr><th>Role</th><th>Program</th><th>Est. Open</th><th>Fit</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Flight Test Engineer</strong></td><td>777X / 737-10 / 787-10</td><td>~8–12</td><td><span class="tag t-yellow">🟡 Good Fit</span></td><td>Systems, performance, or propulsion FTE — multi-program demand across 2026 cert campaigns</td></tr>
+      <tr><td><strong>Flight Test Instrumentation (FTI) Eng.</strong></td><td>All commercial programs</td><td>~6–10</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>FTI design, installation &amp; data system integration — strong Cyient aerospace electronics match</td></tr>
+      <tr><td><strong>Flight Test Data Analyst</strong></td><td>777X / 737 MAX</td><td>~5–8</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>Post-flight data reduction, MATLAB/Python analysis, certification data packages</td></tr>
+      <tr><td><strong>Avionics Systems Test Engineer</strong></td><td>777X avionics</td><td>~5–8</td><td><span class="tag t-yellow">🟡 Good Fit</span></td><td>Avionics iron-bird &amp; aircraft-level test, FAA DER data packages</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="top5-head">Top 5 In-Demand Skills / Functions — BT&amp;E (Boeing Test &amp; Evaluation)</p>
+<div class="top5-grid">
+  <div class="t5w" style="--c:#1a6fc4">
+    <div class="t5rank">#1 In Demand</div>
+    <div class="t5name">Flight Test Instrumentation Eng.</div>
+    <div class="t5sub">FTI system design &amp; install, data acquisition, 777X/737/787 cert campaigns</div>
+    <div class="t5sites">Everett WA · Edwards AFB CA</div>
+  </div>
+  <div class="t5w" style="--c:#0055a5">
+    <div class="t5rank">#2 In Demand</div>
+    <div class="t5name">Flight Test Data Analyst</div>
+    <div class="t5sub">Post-flight data reduction, MATLAB/Python, FAA certification data packages</div>
+    <div class="t5sites">Everett WA · Moses Lake WA</div>
+  </div>
+  <div class="t5w" style="--c:#2563a8">
+    <div class="t5rank">#3 In Demand</div>
+    <div class="t5name">Flight Test Engineer</div>
+    <div class="t5sub">Systems/performance/propulsion FTE, multi-program 2026 cert campaigns active</div>
+    <div class="t5sites">Everett WA · Edwards AFB CA</div>
+  </div>
+  <div class="t5w" style="--c:#003f82">
+    <div class="t5rank">#4 In Demand</div>
+    <div class="t5name">Avionics Systems Test Engineer</div>
+    <div class="t5sub">777X avionics iron-bird &amp; aircraft-level test, FAA DER data package support</div>
+    <div class="t5sites">Everett WA</div>
+  </div>
+  <div class="t5w" style="--c:#1e88e5">
+    <div class="t5rank">#5 In Demand</div>
+    <div class="t5name">Systems Integration Test Eng.</div>
+    <div class="t5sub">Cross-system test planning, requirements verification, ground test coordination</div>
+    <div class="t5sites">Everett WA · Seattle WA</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION: BGS
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="bgs"></a>
+<div class="div-header bgs-hdr">
+  <div><div class="div-badge">🌐 BGS</div></div>
+  <div><h2>Boeing Global Services</h2><div class="div-sub">Dallas TX · San Diego CA · Denver/Aurora CO · San Antonio TX</div></div>
+</div>
+
+<div class="warn-green">📌 <strong>Warm Path:</strong> DLM holds an active BGS production contract signed Feb 2025. Use this existing relationship to get a warm introduction to TA contacts in Dallas, Denver, and San Diego. Lead every BGS conversation with "We're already your production partner."</div>
+
+<div class="loc-grid">
+  <div class="loc-card bgs-top"><h3>Dallas, TX <span class="loc-count bgs-c">~10–20 open</span></h3><div class="lsub">BGS — Supply Chain, Procurement &amp; Business Ops Hub</div><div class="chip-wrap"><span class="chip hot">Procurement Agent (non-Export-Control)</span><span class="chip">BGS Business Ops Specialist</span><span class="chip">SC Call Center Support</span><span class="chip">Shipping/Receiving Specialist</span></div></div>
+  <div class="loc-card bgs-top"><h3>San Diego, CA <span class="loc-count bgs-c">~15–25 open</span></h3><div class="lsub">BGS — IT, Cloud &amp; Field Services (commercial fleet)</div><div class="chip-wrap"><span class="chip tech">Sr. Cloud Platform (Kubernetes)</span><span class="chip tech">Sr. Wi-Fi/Cellular Network Architect</span><span class="chip tech">DevOps Developer (Lead/Sr)</span><span class="chip">Field Service Rep (commercial)</span></div></div>
+  <div class="loc-card bgs-top"><h3>Denver / Aurora, CO <span class="loc-count bgs-c">~15+ open</span></h3><div class="lsub">BGS — Software Engineering &amp; Digital Solutions Campus</div><div class="chip-wrap"><span class="chip tech">Full-Stack Eng. (FishTools team)</span><span class="chip tech">Full-Stack Eng. (GSCCE platform)</span><span class="chip tech">Sr. Full-Stack Developer</span><span class="chip">Data Center Facility O&amp;M Lead</span></div></div>
+</div>
+
+<div class="card section-gap">
+  <div class="card-title" style="color:var(--bgs);">📋 BGS Roles Summary</div>
+  <table>
+    <thead><tr style="background:var(--bgs);color:#fff;"><th>Location</th><th>Department</th><th>Key Non-Clearance Roles</th><th>Est. Open</th><th>Urgency</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Dallas, TX</strong></td><td>Supply Chain &amp; Business Operations</td><td>Procurement Agent · Business Ops Specialist · SC Call Center · Shipping/Receiving</td><td>~10–20</td><td><span class="tag t-yellow">🟡 Medium</span></td></tr>
+      <tr><td><strong>San Diego, CA</strong></td><td>IT Infrastructure &amp; Field Services</td><td>Cloud/Kubernetes · Network Architect · DevOps · Commercial FSR</td><td>~15–25</td><td><span class="tag t-yellow">🟡 Medium</span></td></tr>
+      <tr><td><strong>Denver/Aurora, CO</strong></td><td>Digital Solutions / Software Engineering</td><td>Full-Stack Eng. (FishTools, GSCCE) · Data Center O&amp;M</td><td>~15+</td><td><span class="tag t-yellow">🟡 Med-High</span></td></tr>
+      <tr class="total-row"><td><strong>BGS TOTAL</strong></td><td></td><td></td><td><strong>~40–60</strong></td><td><span class="tag t-yellow">🟡 Warm Path via DLM Contract</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="top5-head">Top 5 In-Demand Skills / Functions — Boeing Global Services</p>
+<div class="top5-grid">
+  <div class="t5w" style="--c:#00796b">
+    <div class="t5rank">#1 In Demand</div>
+    <div class="t5name">Full-Stack Software Engineer</div>
+    <div class="t5sub">FishTools &amp; GSCCE platforms, Java/React, active reqs Mar–Apr 2026, no clearance</div>
+    <div class="t5sites">Denver/Aurora CO</div>
+  </div>
+  <div class="t5w" style="--c:#00897b">
+    <div class="t5rank">#2 In Demand</div>
+    <div class="t5name">DevOps / Cloud Platform Engineer</div>
+    <div class="t5sub">Kubernetes, CI/CD pipelines, BGS IT infrastructure modernization</div>
+    <div class="t5sites">San Diego CA · Denver CO</div>
+  </div>
+  <div class="t5w" style="--c:#004d40">
+    <div class="t5rank">#3 In Demand</div>
+    <div class="t5name">Network Architect (Wi-Fi/Cellular)</div>
+    <div class="t5sub">Commercial fleet connectivity, Sr. Network Architect, confirmed non-clearance</div>
+    <div class="t5sites">San Diego CA</div>
+  </div>
+  <div class="t5w" style="--c:#26a69a">
+    <div class="t5rank">#4 In Demand</div>
+    <div class="t5name">Supply Chain / Procurement Specialist</div>
+    <div class="t5sub">Procurement Agent (non-export-control), SC business ops, call center support</div>
+    <div class="t5sites">Dallas TX</div>
+  </div>
+  <div class="t5w" style="--c:#00695c">
+    <div class="t5rank">#5 In Demand</div>
+    <div class="t5name">MRO Field Service Rep</div>
+    <div class="t5sub">Commercial fleet maintenance support, non-clearance confirmed, FSR roles active</div>
+    <div class="t5sites">San Diego CA · San Antonio TX</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION: BDS
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="bds"></a>
+<div class="div-header bds-hdr">
+  <div><div class="div-badge">🛡️ BDS</div></div>
+  <div><h2>Boeing Defense, Space &amp; Security</h2><div class="div-sub">El Segundo CA · St. Louis MO — Non-Clearance Pockets Only</div></div>
+</div>
+
+<div class="warn-purple">⚠️ <strong>Important:</strong> Most BDS engineering roles require active Secret clearance. The roles below are specifically identified as non-clearance or "ability to obtain" only. Target only the IT, SAP, Supply Chain, and Finance pockets listed here.</div>
+
+<div class="loc-grid">
+  <div class="loc-card bds-top"><h3>El Segundo, CA <span class="loc-count bds-c">~20–30 open</span></h3><div class="lsub">BDS + Millennium Space Systems (Boeing subsidiary)</div><div class="chip-wrap"><span class="chip hot">SAP PP/Demand-to-Plan Lead</span><span class="chip hot">SAP QM Functional Lead</span><span class="chip tech">Sr. Cloud Platform (Kubernetes)</span><span class="chip">Network Designer (Exp/Lead)</span><span class="chip">Supply Base Mgmt Specialist</span><span class="chip">Supply Chain Coordinator (MSS)</span></div></div>
+  <div class="loc-card bds-top"><h3>St. Louis, MO <span class="loc-count bds-c">~40–60 non-clr</span></h3><div class="lsub">BDS HQ returned Feb 2026 — support functions expanding</div><div class="chip-wrap"><span class="chip hot">SAP Finance FI/CO Analyst (Sr)</span><span class="chip hot">SAP FI/CO Intercompany Analyst</span><span class="chip tech">Data Solution Architect</span><span class="chip tech">Assoc. Software Eng. — AI</span><span class="chip tech">DevSecOps Eng. (Exp/Sr)</span><span class="chip">SC Domain Data Steward (x3)</span></div></div>
+</div>
+
+<div class="card section-gap">
+  <div class="card-title" style="color:var(--bds);">📋 BDS Non-Clearance Pockets Summary</div>
+  <table>
+    <thead><tr style="background:var(--bds);color:#fff;"><th>Location</th><th>Non-Clearance Dept Focus</th><th>Key Roles</th><th>Est. Non-Clr Open</th><th>Urgency</th></tr></thead>
+    <tbody>
+      <tr><td><strong>El Segundo, CA</strong></td><td>SAP · IT Infrastructure · Supply Chain</td><td>SAP PP/QM · Kubernetes · Network Designer · SC Coordinator</td><td>~20–30</td><td><span class="tag t-yellow">🟡 Med-High</span></td></tr>
+      <tr><td><strong>St. Louis, MO</strong></td><td>SAP Finance · IT/Software · SC Data</td><td>SAP FI/CO · Data Architect · DevSecOps · AI Software Eng · SC Data Steward (x3)</td><td>~40–60</td><td><span class="tag t-red">🔴 HQ Expansion — High</span></td></tr>
+      <tr class="total-row"><td><strong>BDS TOTAL (non-clr)</strong></td><td></td><td></td><td><strong>~60–90</strong></td><td><span class="tag t-purple">🟣 Targeted Pockets</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="top5-head">Top 5 In-Demand Skills / Functions — BDS (Non-Clearance Pockets)</p>
+<div class="top5-grid">
+  <div class="t5w" style="--c:#6a1b9a">
+    <div class="t5rank">#1 In Demand</div>
+    <div class="t5name">SAP FI/CO Analyst</div>
+    <div class="t5sub">BDS HQ St. Louis finance build-out, intercompany accounting, Sr/Exp levels, no clearance confirmed</div>
+    <div class="t5sites">St. Louis MO</div>
+  </div>
+  <div class="t5w" style="--c:#8e24aa">
+    <div class="t5rank">#2 In Demand</div>
+    <div class="t5name">DevSecOps Engineer</div>
+    <div class="t5sub">HQ IT infrastructure, CI/CD security, DevSecOps pipeline, Exp/Sr levels active</div>
+    <div class="t5sites">St. Louis MO · El Segundo CA</div>
+  </div>
+  <div class="t5w" style="--c:#4a0072">
+    <div class="t5rank">#3 In Demand</div>
+    <div class="t5name">Data Solution Architect</div>
+    <div class="t5sub">BDS HQ data modernization, enterprise data architecture, no clearance requirement</div>
+    <div class="t5sites">St. Louis MO</div>
+  </div>
+  <div class="t5w" style="--c:#7b1fa2">
+    <div class="t5rank">#4 In Demand</div>
+    <div class="t5name">SAP PP/QM Functional Lead</div>
+    <div class="t5sub">Production planning &amp; quality management, Millennium Space Systems entry point</div>
+    <div class="t5sites">El Segundo CA</div>
+  </div>
+  <div class="t5w" style="--c:#9c27b0">
+    <div class="t5rank">#5 In Demand</div>
+    <div class="t5name">Supply Chain Data Steward</div>
+    <div class="t5sub">SC Domain Data Steward (x3 open), SC Technical Data Steward, data governance focus</div>
+    <div class="t5sites">St. Louis MO</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION: SPIRIT AEROSYSTEMS
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="spirit"></a>
+<div class="div-header spirit-hdr">
+  <div><div class="div-badge">🔩 Spirit AeroSystems</div></div>
+  <div><h2>Spirit AeroSystems — Boeing Subsidiary Since Dec 2025</h2><div class="div-sub">Wichita, KS (primary) · Tulsa OK · Prestwick UK · Belfast UK</div></div>
+</div>
+
+<div class="warn-orange">📌 <strong>Key Context:</strong> Boeing completed the $8.3B acquisition of Spirit AeroSystems on Dec 8, 2025. Spirit's ~12,000-person Wichita workforce is now Boeing. Spirit makes 737 fuselages + major structures for 767, 777, and 787. Use approved-supplier status to open the door — Spirit TA now operates under Boeing's umbrella.</div>
+
+<div class="loc-grid">
+  <div class="loc-card spirit-top"><h3>Wichita, KS <span class="loc-count spirit-c">~107 open</span></h3><div class="lsub">Spirit (Boeing) — 737 Fuselage + 767/777/787 Structures</div><div class="chip-wrap"><span class="chip hot">Manufacturing Engineer (Entry/Assoc/Sr)</span><span class="chip hot">Industrial Engineer (Entry level)</span><span class="chip hot">Quality Engineer</span><span class="chip">Structural Analysis Engineer</span><span class="chip">Operations Eng. Manager</span><span class="chip">Composite Mfg Specialist</span></div></div>
+</div>
+
+<div class="card section-gap">
+  <div class="card-title" style="color:var(--spirit);">📋 Spirit AeroSystems — Open Roles &amp; Fit</div>
+  <table>
+    <thead><tr style="background:var(--spirit);color:#fff;"><th>Role</th><th>Level</th><th>Location</th><th>Salary Range</th><th>Fit</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Manufacturing Engineer</strong></td><td>Entry / Associate / Senior</td><td>Wichita, KS</td><td>$76k–$177k</td><td><span class="tag t-orange">🟠 Good Fit</span></td><td>Boeing holding dedicated Engineering Hiring Events in Wichita</td></tr>
+      <tr><td><strong>Industrial Engineer</strong></td><td>Entry Level</td><td>Wichita, KS</td><td>~$76k–$116k</td><td><span class="tag t-orange">🟠 Good Fit</span></td><td>Lean/process focus for composite &amp; metallic structures</td></tr>
+      <tr><td><strong>Quality Engineer</strong></td><td>Multiple levels</td><td>Wichita, KS</td><td>$72k–$155k</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>AS9100 focus; Spirit QA now aligns to Boeing's quality mandates</td></tr>
+      <tr><td><strong>Structural Analysis Engineer</strong></td><td>Mid / Senior</td><td>Wichita, KS</td><td>$89k–$177k</td><td><span class="tag t-orange">🟠 Good Fit</span></td><td>ABET-accredited degree required; 737 fuselage structural work</td></tr>
+      <tr><td><strong>Composite Mfg Specialist</strong></td><td>Mid</td><td>Wichita, KS</td><td>$75k–$130k</td><td><span class="tag t-orange">🟠 Good Fit</span></td><td>Advanced composite fabrication for 737 aerostructures</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="top5-head">Top 5 In-Demand Skills / Functions — Spirit AeroSystems (Wichita)</p>
+<div class="top5-grid">
+  <div class="t5w" style="--c:#b85c00">
+    <div class="t5rank">#1 In Demand</div>
+    <div class="t5name">Manufacturing Engineer</div>
+    <div class="t5sub">737 fuselage production, Boeing Hiring Events active, all levels Entry–Senior</div>
+    <div class="t5sites">Wichita KS</div>
+  </div>
+  <div class="t5w" style="--c:#d07000">
+    <div class="t5rank">#2 In Demand</div>
+    <div class="t5name">Quality Engineer (AS9100)</div>
+    <div class="t5sub">Boeing quality mandate alignment, all levels, AS9100, first article, NDT</div>
+    <div class="t5sites">Wichita KS</div>
+  </div>
+  <div class="t5w" style="--c:#7f3f00">
+    <div class="t5rank">#3 In Demand</div>
+    <div class="t5name">Structural Analysis Engineer</div>
+    <div class="t5sub">737/787 fuselage structural FEA, ABET required, mid/senior levels open</div>
+    <div class="t5sites">Wichita KS</div>
+  </div>
+  <div class="t5w" style="--c:#ef8c00">
+    <div class="t5rank">#4 In Demand</div>
+    <div class="t5name">Industrial Engineer</div>
+    <div class="t5sub">Lean manufacturing, process optimization for composite &amp; metallic structure lines</div>
+    <div class="t5sites">Wichita KS</div>
+  </div>
+  <div class="t5w" style="--c:#c56200">
+    <div class="t5rank">#5 In Demand</div>
+    <div class="t5name">Composite Mfg Specialist</div>
+    <div class="t5sub">Advanced composite fabrication, 737 aerostructure panels, NDT experience preferred</div>
+    <div class="t5sites">Wichita KS</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION: INTERNATIONAL — INDIA
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="india"></a>
+<div class="div-header intl-hdr">
+  <div><div class="div-badge">🇮🇳 Boeing India</div></div>
+  <div><h2>Boeing India Engineering &amp; Technology Center (BIETC)</h2><div class="div-sub">Bengaluru, Karnataka — 5,500+ engineers · 130+ open positions</div></div>
+</div>
+
+<div class="warn-blue">📌 <strong>Opportunity:</strong> BIETC in Bengaluru is Boeing's largest non-US engineering hub. With 5,500+ engineers already there and 130+ open roles, this is a prime location to position as a local engineering staffing and delivery partner for Boeing's global programs. Strong overlap with Bengaluru capabilities in AI/ML, SAP, CATIA, and Systems Engineering.</div>
+
+<div class="loc-grid">
+  <div class="loc-card intl-top"><h3>Bengaluru, India <span class="loc-count intl-c">~130+ open</span></h3><div class="lsub">BIETC — R&amp;D, Engineering &amp; Digital Innovation</div><div class="chip-wrap"><span class="chip hot">AI/ML Engineer (Predictive Maint.)</span><span class="chip hot">Lead AI/ML Eng. (MLOps)</span><span class="chip tech">Assoc. Software Eng. (Java FSD)</span><span class="chip tech">Sr. DevOps Developer</span><span class="chip tech">SAP EHS Functional Analyst</span><span class="chip tech">Sr. SAP Technical Project Lead</span><span class="chip">Systems Engineering Manager (MBSE)</span><span class="chip">Structural &amp; Payload Design Eng.</span><span class="chip">Mechanical System Design Eng.</span></div></div>
+</div>
+
+<div class="card section-gap">
+  <div class="card-title" style="color:var(--intl);">📋 BIETC Hiring Categories &amp; Alignment</div>
+  <table>
+    <thead><tr style="background:var(--intl);color:#fff;"><th>Department</th><th>Key Roles</th><th>Est. Open</th><th>Fit</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><strong>AI / ML &amp; Data</strong></td><td>Lead/Exp. AI/ML Eng. (Predictive Maint.) · MLOps · Data Engineer</td><td>~20–30</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>Predictive maintenance for commercial fleet — aligns with digital engineering practice</td></tr>
+      <tr><td><strong>Software Engineering</strong></td><td>Assoc. Software Eng. (Java FSD, React Native) · DevOps</td><td>~25–35</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>Full-stack Java &amp; React Native — active postings with multiple levels</td></tr>
+      <tr><td><strong>SAP / ERP</strong></td><td>SAP EHS Functional Analyst · SAP Technical Project Lead · Salesforce Admin</td><td>~10–15</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>SAP practice is a direct match</td></tr>
+      <tr><td><strong>Systems &amp; Mechanical Eng.</strong></td><td>Systems Eng. Manager (MBSE) · Structural/Payload Design · Mechanical System Design</td><td>~20–25</td><td><span class="tag t-yellow">🟡 Good Fit</span></td><td>MBSE aligns to design engineering capability</td></tr>
+      <tr><td><strong>Manufacturing Eng.</strong></td><td>Experienced Mfg Eng. (Electrical/Electronics)</td><td>~5–10</td><td><span class="tag t-yellow">🟡 Good Fit</span></td><td>Electronics mfg engineering in Bengaluru campus</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="top5-head">Top 5 In-Demand Skills / Functions — Boeing India (BIETC)</p>
+<div class="top5-grid">
+  <div class="t5w" style="--c:#1565c0">
+    <div class="t5rank">#1 In Demand</div>
+    <div class="t5name">AI/ML Engineer</div>
+    <div class="t5sub">Predictive maintenance, MLOps, Lead/Exp levels, high alignment with digital engineering bench</div>
+    <div class="t5sites">Bengaluru IN</div>
+  </div>
+  <div class="t5w" style="--c:#1976d2">
+    <div class="t5rank">#2 In Demand</div>
+    <div class="t5name">Software Engineer (Java FSD)</div>
+    <div class="t5sub">Full-stack Java, React Native, multiple levels open, no clearance requirement</div>
+    <div class="t5sites">Bengaluru IN</div>
+  </div>
+  <div class="t5w" style="--c:#0d47a1">
+    <div class="t5rank">#3 In Demand</div>
+    <div class="t5name">SAP EHS / Technical Lead</div>
+    <div class="t5sub">SAP EHS Functional Analyst, Sr. SAP Technical Project Lead, Salesforce Admin</div>
+    <div class="t5sites">Bengaluru IN</div>
+  </div>
+  <div class="t5w" style="--c:#1e88e5">
+    <div class="t5rank">#4 In Demand</div>
+    <div class="t5name">Systems Engineer (MBSE)</div>
+    <div class="t5sub">Model-based systems engineering, systems integration manager, DOORS/Cameo</div>
+    <div class="t5sites">Bengaluru IN</div>
+  </div>
+  <div class="t5w" style="--c:#42a5f5">
+    <div class="t5rank">#5 In Demand</div>
+    <div class="t5name">DevOps / Sr. DevOps Developer</div>
+    <div class="t5sub">CI/CD, cloud integration, active postings with senior/exp levels, no clearance</div>
+    <div class="t5sites">Bengaluru IN</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION: INTERNATIONAL — BRAZIL
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="brazil"></a>
+<div class="div-header intl-hdr">
+  <div><div class="div-badge">🇧🇷 Boeing Brazil</div></div>
+  <div><h2>Boeing Brazil Engineering &amp; Technology Center (BETC)</h2><div class="div-sub">São José dos Campos, São Paulo State — Engineering &amp; Safety focus</div></div>
+</div>
+
+<div class="warn-blue">📌 <strong>Context:</strong> Boeing's Brazil Engineering &amp; Technology Center is part of a global network of 15 Boeing engineering centers. São José dos Campos is Brazil's aerospace capital (also home to Embraer). Boeing has invested $5.3M in Brazilian STEM communities. Active hiring April 2026 for structural, electrical, and safety roles.</div>
+
+<div class="loc-grid">
+  <div class="loc-card intl-top"><h3>São José dos Campos, Brazil <span class="loc-count intl-c">Active hiring</span></h3><div class="lsub">BETC — Electrical, Structures &amp; Safety Engineering</div><div class="chip-wrap"><span class="chip">Mid-Career Electrical &amp; Electronics Systems Integration Eng.</span><span class="chip">Sr. Systems Safety Engineer</span><span class="chip">Sr. Electrical Power Systems Engineer</span><span class="chip">Mechanical &amp; Structural Engineering Manager</span></div></div>
+</div>
+
+<div class="card section-gap">
+  <div class="card-title" style="color:var(--intl);">📋 Brazil BETC — Roles &amp; Considerations</div>
+  <table>
+    <thead><tr style="background:var(--intl);color:#fff;"><th>Role</th><th>Level</th><th>Department</th><th>Opportunity</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Electrical &amp; Electronics Systems Integration Eng.</strong></td><td>Mid-Career</td><td>Electrical Systems Engineering</td><td>Electrical design capabilities; explore remote/hybrid engagement from India center</td></tr>
+      <tr><td><strong>Systems Safety Engineer</strong></td><td>Senior</td><td>Safety Engineering</td><td>777X safety prep work — may extend to Brazil BETC; monitor for expanded hiring</td></tr>
+      <tr><td><strong>Electrical Power Systems Engineer</strong></td><td>Senior</td><td>Electrical Power</td><td>Niche specialty; flag to power systems practice if available</td></tr>
+      <tr><td><strong>Structural Engineering Manager</strong></td><td>Manager</td><td>Mechanical &amp; Structural</td><td>Leadership role indicates team growth; potential for junior structural engineers to follow</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="top5-head">Top 5 In-Demand Skills / Functions — Boeing Brazil (BETC)</p>
+<div class="top5-grid">
+  <div class="t5w" style="--c:#1565c0">
+    <div class="t5rank">#1 In Demand</div>
+    <div class="t5name">Electrical &amp; Electronics Systems Eng.</div>
+    <div class="t5sub">Systems integration, mid-career level, electrical design, avionics systems</div>
+    <div class="t5sites">São José dos Campos, Brazil</div>
+  </div>
+  <div class="t5w" style="--c:#1976d2">
+    <div class="t5rank">#2 In Demand</div>
+    <div class="t5name">Systems Safety Engineer</div>
+    <div class="t5sub">Sr. level, 777X safety work extension, safety assurance and hazard analysis</div>
+    <div class="t5sites">São José dos Campos, Brazil</div>
+  </div>
+  <div class="t5w" style="--c:#0d47a1">
+    <div class="t5rank">#3 In Demand</div>
+    <div class="t5name">Electrical Power Systems Eng.</div>
+    <div class="t5sub">Senior level, power architecture for commercial aircraft programs</div>
+    <div class="t5sites">São José dos Campos, Brazil</div>
+  </div>
+  <div class="t5w" style="--c:#1e88e5">
+    <div class="t5rank">#4 In Demand</div>
+    <div class="t5name">Structural Engineering (Mechanical)</div>
+    <div class="t5sub">Manager-level role signals team growth, CATIA structures, FEA analysis</div>
+    <div class="t5sites">São José dos Campos, Brazil</div>
+  </div>
+  <div class="t5w" style="--c:#42a5f5">
+    <div class="t5rank">#5 In Demand</div>
+    <div class="t5name">Software / Embedded Systems Eng.</div>
+    <div class="t5sub">Aviation embedded software, potential remote engagement from India BIETC bench</div>
+    <div class="t5sites">São José dos Campos, Brazil</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION: WISK AERO
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="wisk"></a>
+<div class="div-header wisk-hdr">
+  <div><div class="div-badge">🚁 Wisk Aero</div></div>
+  <div><h2>Wisk Aero — Boeing Subsidiary</h2><div class="div-sub">Mountain View, CA (HQ) · Montreal, Canada · ~52 open positions</div></div>
+</div>
+
+<div class="warn-box" style="background:#fff0f0;border:1.5px solid #ef9a9a;color:#7f1717;">📌 <strong>Context:</strong> Wisk is 100% Boeing-owned building the world's first self-flying autonomous eVTOL air taxi. First candidate for FAA certification of a passenger autonomous aircraft. 52 full-time roles active 2026. No clearance requirements.</div>
+
+<div class="loc-grid">
+  <div class="loc-card wisk-top"><h3>Mountain View, CA <span class="loc-count wisk-c">~52 total open</span></h3><div class="lsub">Wisk HQ — Autonomy, Controls &amp; Flight Systems</div><div class="chip-wrap"><span class="chip hot">Senior Controls Engineer (Autonomous SW)</span><span class="chip hot">Staff Software Engineer (Avionics, FAA cert)</span><span class="chip hot">Staff Systems Software Eng. (Ground Control)</span><span class="chip">Flight Test Instrumentation Eng.</span><span class="chip">Propulsion Engineer</span><span class="chip">Safety Systems Engineer</span></div></div>
+  <div class="loc-card wisk-top"><h3>Montreal, Canada <span class="loc-count wisk-c">Internships 2026</span></h3><div class="lsub">Wisk Canada — Summer 2026 internship programs</div><div class="chip-wrap"><span class="chip">Autonomy &amp; DAA Intern (2026)</span><span class="chip">Detect &amp; Avoid Alerting Systems</span><span class="chip">Conflict Detection &amp; Resolution Algorithms</span></div></div>
+</div>
+
+<div class="card section-gap">
+  <div class="card-title" style="color:var(--wisk);">📋 Wisk — Roles &amp; Fit Assessment</div>
+  <table>
+    <thead><tr style="background:var(--wisk);color:#fff;"><th>Role</th><th>Focus Area</th><th>Est. Open</th><th>Fit</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Senior Controls Engineer</strong></td><td>Autonomous flight algorithms, state estimation</td><td>~5–8</td><td><span class="tag t-yellow">🟡 Possible</span></td><td>Highly specialized — assess controls engineering depth before pitching</td></tr>
+      <tr><td><strong>Staff Software Engineer (Avionics)</strong></td><td>FAA DO-178C certified avionics software</td><td>~8–12</td><td><span class="tag t-yellow">🟡 Possible</span></td><td>Requires DO-178C experience — aerospace SW team may qualify</td></tr>
+      <tr><td><strong>Flight Test Instrumentation Eng.</strong></td><td>FTI systems design, integration, calibration</td><td>~3–5</td><td><span class="tag t-yellow">🟡 Possible</span></td><td>Good match if FTI-experienced engineers in Bay Area pipeline</td></tr>
+      <tr><td><strong>Propulsion / Electronics Eng.</strong></td><td>eVTOL propulsion systems &amp; electronics</td><td>~5–8</td><td><span class="tag t-green">🟢 Exploratory</span></td><td>New domain — flag for future positioning as Wisk scales toward FAA cert</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="top5-head">Top 5 In-Demand Skills / Functions — Wisk Aero</p>
+<div class="top5-grid">
+  <div class="t5w" style="--c:#c62828">
+    <div class="t5rank">#1 In Demand</div>
+    <div class="t5name">Staff Software Eng. (Avionics)</div>
+    <div class="t5sub">DO-178C certified avionics SW, eVTOL flight management, FAA certification path</div>
+    <div class="t5sites">Mountain View CA</div>
+  </div>
+  <div class="t5w" style="--c:#e53935">
+    <div class="t5rank">#2 In Demand</div>
+    <div class="t5name">Senior Controls Engineer</div>
+    <div class="t5sub">Autonomous flight algorithms, state estimation, self-flying SW, safety-critical</div>
+    <div class="t5sites">Mountain View CA</div>
+  </div>
+  <div class="t5w" style="--c:#b71c1c">
+    <div class="t5rank">#3 In Demand</div>
+    <div class="t5name">Staff Systems Software Eng.</div>
+    <div class="t5sub">Ground control station software, command &amp; control architecture, real-time systems</div>
+    <div class="t5sites">Mountain View CA</div>
+  </div>
+  <div class="t5w" style="--c:#d32f2f">
+    <div class="t5rank">#4 In Demand</div>
+    <div class="t5name">Safety Systems Engineer</div>
+    <div class="t5sub">eVTOL safety assurance, DAL A/B certification activities, safety case development</div>
+    <div class="t5sites">Mountain View CA</div>
+  </div>
+  <div class="t5w" style="--c:#ef5350">
+    <div class="t5rank">#5 In Demand</div>
+    <div class="t5name">Flight Test Instrumentation Eng.</div>
+    <div class="t5sub">FTI system design, integration &amp; calibration, autonomous vehicle flight test data</div>
+    <div class="t5sites">Mountain View CA</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION: AVIONX / MRO DIGITAL
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="avionx"></a>
+<div class="div-header avionx-hdr">
+  <div><div class="div-badge">📡 AvionX / MRO Digital</div></div>
+  <div><h2>AvionX — Boeing MRO Digital &amp; Analytics (under BGS)</h2><div class="div-sub">San Antonio TX · Bristol UK · Virtual/Remote — Data Analytics &amp; MRO Digital Enablement</div></div>
+</div>
+
+<div class="warn-green">📌 <strong>Context:</strong> AvionX operates under Boeing Global Services as Boeing's MRO analytics and digital enablement brand. Focused on predictive maintenance, fleet health data, and MRO integration. Note: The San Antonio MRO Digital Analyst role requires clearance — but UK/Remote data roles do not.</div>
+
+<div class="loc-grid">
+  <div class="loc-card avionx-top"><h3>San Antonio, TX <span style="float:right;background:#c62828;color:#fff;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">⚠️ Clearance Req.</span></h3><div class="lsub">BGS / AvionX — MRO Digital Analytics</div><div class="chip-wrap"><span class="chip">MRO Digital/Analytics Integration Analyst (Mid)</span></div><div style="font-size:10.5px;color:#c62828;margin-top:6px;">⚠️ This specific role requires U.S. Secret clearance Post-Start — exclude from pitch</div></div>
+  <div class="loc-card avionx-top"><h3>Bristol, UK <span class="loc-count" style="background:var(--avionx);">Graduate 2026</span></h3><div class="lsub">BGS — Digital Services &amp; Analytics Graduate Programme</div><div class="chip-wrap"><span class="chip green">Digital Services &amp; Analytics Graduate (2026)</span><span class="chip green">No clearance required</span></div></div>
+  <div class="loc-card avionx-top"><h3>Virtual / All Sites <span class="loc-count" style="background:var(--avionx);">Active hiring</span></h3><div class="lsub">Boeing Data Science &amp; Analytics (BGS/Enterprise)</div><div class="chip-wrap"><span class="chip tech">AI Governance Sr. Manager</span><span class="chip tech">Lead Data Steward (Virtual)</span><span class="chip tech">Software Eng. — AI-ML (GenAI)</span><span class="chip tech">Sales Performance Analyst</span></div></div>
+</div>
+
+<div class="card section-gap">
+  <div class="card-title" style="color:var(--avionx);">📋 AvionX / MRO Digital — Opportunity Assessment</div>
+  <table>
+    <thead><tr style="background:var(--avionx);color:#fff;"><th>Role</th><th>Location</th><th>Clearance?</th><th>Fit</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><strong>MRO Digital/Analytics Integration Analyst</strong></td><td>San Antonio, TX</td><td><span class="tag t-red">❌ Secret Required</span></td><td>Excluded</td><td>Do not pitch — U.S. Secret clearance required post-start</td></tr>
+      <tr><td><strong>Digital Services &amp; Analytics Graduate</strong></td><td>Bristol, UK</td><td><span class="tag t-green">✅ No Clearance</span></td><td><span class="tag t-green">🟢 Possible (UK)</span></td><td>Graduate rotational 2026 — monitor if UK analytics talent available</td></tr>
+      <tr><td><strong>AI Governance Senior Manager</strong></td><td>Virtual</td><td><span class="tag t-green">✅ No Clearance</span></td><td><span class="tag t-yellow">🟡 Possible</span></td><td>AI governance &amp; ethics focus — AI practice could align</td></tr>
+      <tr><td><strong>Software Engineer — AI-ML (GenAI)</strong></td><td>Virtual / Bengaluru</td><td><span class="tag t-green">✅ No Clearance</span></td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>GenAI engineering — India AI/ML bench directly applicable</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="top5-head">Top 5 In-Demand Skills / Functions — AvionX / MRO Digital</p>
+<div class="top5-grid">
+  <div class="t5w" style="--c:#2e7d32">
+    <div class="t5rank">#1 In Demand</div>
+    <div class="t5name">Software Eng. — AI-ML (GenAI)</div>
+    <div class="t5sub">GenAI engineering, MRO analytics, virtual/Bengaluru, no clearance — direct India bench fit</div>
+    <div class="t5sites">Virtual / Bengaluru IN</div>
+  </div>
+  <div class="t5w" style="--c:#388e3c">
+    <div class="t5rank">#2 In Demand</div>
+    <div class="t5name">AI Governance Sr. Manager</div>
+    <div class="t5sub">Enterprise AI governance &amp; ethics, Boeing-wide mandate, virtual role, no clearance</div>
+    <div class="t5sites">Virtual</div>
+  </div>
+  <div class="t5w" style="--c:#1b5e20">
+    <div class="t5rank">#3 In Demand</div>
+    <div class="t5name">Lead Data Steward</div>
+    <div class="t5sub">Enterprise data governance, virtual/remote, MRO data domain management</div>
+    <div class="t5sites">Virtual</div>
+  </div>
+  <div class="t5w" style="--c:#43a047">
+    <div class="t5rank">#4 In Demand</div>
+    <div class="t5name">Digital Services &amp; Analytics Grad.</div>
+    <div class="t5sub">Boeing BGS graduate rotational 2026, analytics/MRO, no clearance, Bristol UK</div>
+    <div class="t5sites">Bristol UK</div>
+  </div>
+  <div class="t5w" style="--c:#66bb6a">
+    <div class="t5rank">#5 In Demand</div>
+    <div class="t5name">Sales Performance Analyst</div>
+    <div class="t5sub">BGS performance analytics, data visualization, Exp/Sr levels active, no clearance</div>
+    <div class="t5sites">Virtual / Dallas TX</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION: AURORA FLIGHT SCIENCES
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="aurora"></a>
+<div class="div-header aurora-hdr">
+  <div><div class="div-badge">🛩️ Aurora Flight Sciences</div></div>
+  <div><h2>Aurora Flight Sciences — Boeing Subsidiary</h2><div class="div-sub">Cambridge MA (HQ) · Bridgewater VA · Manassas VA · Dayton OH — DARPA &amp; USAF Advanced Programs</div></div>
+</div>
+
+<div class="warn-teal">📌 <strong>Context:</strong> Aurora Flight Sciences (acquired by Boeing 2017) is Boeing's advanced autonomous aircraft research lab. Builds DARPA-sponsored programs including the X-65 CRANE active flow control demonstrator, the Centaur optionally-piloted aircraft, and multiple advanced air mobility platforms. Many programs are unclassified research contracts — tech pubs, structures, and autonomy SW roles are accessible entry points. ~60–80 open roles across sites.</div>
+
+<div class="loc-grid">
+  <div class="loc-card aurora-top"><h3>Cambridge, MA <span class="loc-count aurora-c">~35+ open</span></h3><div class="lsub">Aurora HQ — Autonomy, SW, Systems Engineering, Tech Pubs</div><div class="chip-wrap"><span class="chip hot">Autonomy SW Engineer (VTOL/fixed-wing)</span><span class="chip hot">Technical Writer / Publications Specialist</span><span class="chip hot">Systems Engineer (Avionics &amp; Integration)</span><span class="chip tech">Software Engineer (Embedded / ROS)</span><span class="chip">Aerospace Structures Engineer</span><span class="chip">Propulsion Systems Engineer</span></div></div>
+  <div class="loc-card aurora-top"><h3>Manassas, VA <span class="loc-count aurora-c">~15+ open</span></h3><div class="lsub">Aurora Manassas — Flight Test &amp; Experimental Aircraft</div><div class="chip-wrap"><span class="chip hot">Flight Test Engineer (X-65 CRANE)</span><span class="chip hot">Avionics / Controls Integration Eng.</span><span class="chip">Manufacturing Engineer (Experimental)</span><span class="chip">Aircraft Mechanic / A&amp;P</span></div></div>
+  <div class="loc-card aurora-top"><h3>Bridgewater, VA <span class="loc-count aurora-c">~10+ open</span></h3><div class="lsub">Aurora Bridgewater — Advanced Composites &amp; Structures</div><div class="chip-wrap"><span class="chip hot">Composite Structures Engineer</span><span class="chip">Materials &amp; Process Engineer</span><span class="chip">Manufacturing Technician (Composites)</span></div></div>
+</div>
+
+<div class="card section-gap">
+  <div class="card-title" style="color:var(--aurora);">📋 Aurora Flight Sciences — Open Roles &amp; Fit</div>
+  <table>
+    <thead><tr style="background:var(--aurora);color:#fff;"><th>Role</th><th>Site</th><th>Est. Open</th><th>Fit</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Autonomy Software Engineer</strong></td><td>Cambridge, MA</td><td>~10–15</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>ROS, Python, C++; VTOL and fixed-wing autonomy stacks — aligns to embedded SW practice</td></tr>
+      <tr><td><strong>Technical Writer / Publications Specialist</strong></td><td>Cambridge, MA</td><td>~5–8</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>DARPA program documentation, IETMs, operator manuals — clear ILS/tech pubs entry point</td></tr>
+      <tr><td><strong>Systems Engineer (Avionics)</strong></td><td>Cambridge, MA</td><td>~8–12</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>Avionics integration, SysML/MBSE — direct overlap with aerospace systems practice</td></tr>
+      <tr><td><strong>Flight Test Engineer (X-65 CRANE)</strong></td><td>Manassas, VA</td><td>~5–8</td><td><span class="tag t-yellow">🟡 Good Fit</span></td><td>X-65 DARPA CRANE AFC demonstrator test campaign — flight test data, instrumentation</td></tr>
+      <tr><td><strong>Composite Structures Engineer</strong></td><td>Bridgewater, VA</td><td>~5–8</td><td><span class="tag t-yellow">🟡 Good Fit</span></td><td>Advanced composite structures for experimental aircraft — CATIA + composites background preferred</td></tr>
+      <tr><td><strong>Manufacturing Engineer (Experimental)</strong></td><td>Manassas, VA</td><td>~5–8</td><td><span class="tag t-yellow">🟡 Good Fit</span></td><td>One-off experimental airframe builds, low-rate production processes</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="top5-head">Top 5 In-Demand Skills / Functions — Aurora Flight Sciences</p>
+<div class="top5-grid">
+  <div class="t5w" style="--c:#0e7490">
+    <div class="t5rank">#1 In Demand</div>
+    <div class="t5name">Autonomy Software Engineer</div>
+    <div class="t5sub">ROS, Python, C++, VTOL/fixed-wing autonomy stacks, embedded real-time, DARPA programs</div>
+    <div class="t5sites">Cambridge MA</div>
+  </div>
+  <div class="t5w" style="--c:#0891b2">
+    <div class="t5rank">#2 In Demand</div>
+    <div class="t5name">Systems Engineer (Avionics)</div>
+    <div class="t5sub">Avionics integration, SysML/MBSE, DO-178C, experimental aircraft avionics architecture</div>
+    <div class="t5sites">Cambridge MA</div>
+  </div>
+  <div class="t5w" style="--c:#065a6e">
+    <div class="t5rank">#3 In Demand</div>
+    <div class="t5name">Technical Writer / Publications</div>
+    <div class="t5sub">DARPA program documentation, IETMs, operator &amp; maintenance manuals, S1000D — low-clearance barrier</div>
+    <div class="t5sites">Cambridge MA</div>
+  </div>
+  <div class="t5w" style="--c:#22d3ee">
+    <div class="t5rank">#4 In Demand</div>
+    <div class="t5name">Flight Test Engineer</div>
+    <div class="t5sub">X-65 CRANE DARPA test campaign, FTI, flight test data systems, instrumentation</div>
+    <div class="t5sites">Manassas VA</div>
+  </div>
+  <div class="t5w" style="--c:#06b6d4">
+    <div class="t5rank">#5 In Demand</div>
+    <div class="t5name">Composite Structures Engineer</div>
+    <div class="t5sub">Advanced composites for experimental aircraft, CATIA, materials &amp; process engineering</div>
+    <div class="t5sites">Bridgewater VA</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION: INSITU
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="insitu"></a>
+<div class="div-header insitu-hdr">
+  <div><div class="div-badge">🚀 Insitu</div></div>
+  <div><h2>Insitu — Boeing Subsidiary (UAS Systems)</h2><div class="div-sub">Bingen, WA (HQ) · Hood River, OR — ScanEagle · RQ-21 Blackjack · Maritime ISR</div></div>
+</div>
+
+<div class="warn-indigo">📌 <strong>Context:</strong> Insitu (acquired by Boeing 2008) designs and manufactures military UAS systems including the ScanEagle (US Navy/USMC) and the RQ-21 Blackjack (Block 1 and 1B variants). Located in Bingen WA, a small town 60 miles east of Portland. ~40–60 open positions. Many roles require Secret clearance for program work — focus on engineering, manufacturing, and tech pubs roles that are non-clearance or "ability to obtain." Boeing supplier status provides a warm umbrella intro.</div>
+
+<div class="loc-grid">
+  <div class="loc-card insitu-top"><h3>Bingen, WA <span class="loc-count insitu-c">~40–60 open</span></h3><div class="lsub">Insitu HQ — UAS Design, Build &amp; Test for Navy/USMC</div><div class="chip-wrap"><span class="chip hot">Mechanical / Structures Engineer (UAS)</span><span class="chip hot">Manufacturing Engineer (Small UAS)</span><span class="chip hot">Technical Writer / ILS Specialist</span><span class="chip tech">Software Engineer (Mission Systems)</span><span class="chip tech">Electronics / Avionics Engineer</span><span class="chip">Quality Engineer</span><span class="chip">Ground Control Operator (FSR)</span></div></div>
+  <div class="loc-card insitu-top"><h3>Hood River, OR <span class="loc-count insitu-c">Some roles</span></h3><div class="lsub">Insitu satellite office — remote/test support</div><div class="chip-wrap"><span class="chip">Field Service Technician</span><span class="chip">Systems Integration Support</span></div></div>
+</div>
+
+<div class="card section-gap">
+  <div class="card-title" style="color:var(--insitu);">📋 Insitu — Open Roles &amp; Fit Assessment</div>
+  <table>
+    <thead><tr style="background:var(--insitu);color:#fff;"><th>Role</th><th>Clearance?</th><th>Est. Open</th><th>Fit</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Mechanical / Structures Engineer (UAS)</strong></td><td><span class="tag t-yellow">Ability to Obtain</span></td><td>~8–12</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>UAS airframe design, composites, structural analysis — lightweight airframe expertise preferred</td></tr>
+      <tr><td><strong>Technical Writer / ILS Specialist</strong></td><td><span class="tag t-green">✅ Often No Clearance</span></td><td>~5–8</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>ScanEagle/RQ-21 operator &amp; maintenance manuals, S1000D, IETMs — best low-barrier entry point</td></tr>
+      <tr><td><strong>Manufacturing Engineer (Small UAS)</strong></td><td><span class="tag t-green">✅ Often No Clearance</span></td><td>~8–12</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>Low-rate production, composite fabrication, small UAS assembly processes</td></tr>
+      <tr><td><strong>Software Engineer (Mission Systems)</strong></td><td><span class="tag t-yellow">Often Clearance Req.</span></td><td>~8–10</td><td><span class="tag t-yellow">🟡 Possible</span></td><td>Ground control SW, mission data management — some roles may be non-clearance; verify on application</td></tr>
+      <tr><td><strong>Electronics / Avionics Engineer</strong></td><td><span class="tag t-yellow">Ability to Obtain</span></td><td>~5–8</td><td><span class="tag t-yellow">🟡 Good Fit</span></td><td>UAS payload integration, avionics box-level design, EW-adjacent — verify clearance requirement</td></tr>
+      <tr><td><strong>Quality Engineer</strong></td><td><span class="tag t-green">✅ Usually No Clearance</span></td><td>~5–8</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>AS9100 production quality, supplier quality, inspections — familiar Boeing quality mandate</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="top5-head">Top 5 In-Demand Skills / Functions — Insitu (UAS)</p>
+<div class="top5-grid">
+  <div class="t5w" style="--c:#3730a3">
+    <div class="t5rank">#1 In Demand</div>
+    <div class="t5name">Mechanical / Structures Eng. (UAS)</div>
+    <div class="t5sub">UAS airframe design, composites, FEA analysis, lightweight structures for ScanEagle/RQ-21</div>
+    <div class="t5sites">Bingen WA</div>
+  </div>
+  <div class="t5w" style="--c:#4f46e5">
+    <div class="t5rank">#2 In Demand</div>
+    <div class="t5name">Technical Writer / ILS Specialist</div>
+    <div class="t5sub">ScanEagle &amp; RQ-21 operator/maintenance manuals, IETMs, S1000D — often no clearance required</div>
+    <div class="t5sites">Bingen WA</div>
+  </div>
+  <div class="t5w" style="--c:#1e1a6e">
+    <div class="t5rank">#3 In Demand</div>
+    <div class="t5name">Manufacturing Engineer (Small UAS)</div>
+    <div class="t5sub">Low-rate UAS production, composite fabrication, small airframe assembly — no clearance typical</div>
+    <div class="t5sites">Bingen WA</div>
+  </div>
+  <div class="t5w" style="--c:#6366f1">
+    <div class="t5rank">#4 In Demand</div>
+    <div class="t5name">Quality Engineer</div>
+    <div class="t5sub">AS9100 production quality, supplier QE, inspection — Boeing quality mandate, usually no clearance</div>
+    <div class="t5sites">Bingen WA</div>
+  </div>
+  <div class="t5w" style="--c:#4338ca">
+    <div class="t5rank">#5 In Demand</div>
+    <div class="t5name">Electronics / Avionics Engineer</div>
+    <div class="t5sub">UAS payload integration, avionics box-level design, sensor integration, verify clearance requirement</div>
+    <div class="t5sites">Bingen WA</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION: ET&T — ENGINEERING TEST & TECHNOLOGY
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="ett"></a>
+<div class="div-header ett-hdr">
+  <div><div class="div-badge">⚙️ ET&amp;T</div></div>
+  <div>
+    <h2>Engineering, Test &amp; Technology (ET&amp;T)</h2>
+    <div class="div-sub">Horizontal org · Cuts across BCA · BDS · BGS &nbsp;·&nbsp; SVP: Howard McKenzie &nbsp;·&nbsp; Seattle WA · St. Louis MO · Huntington Beach CA</div>
+  </div>
+</div>
+
+<div class="warn-ett">📌 <strong>Context:</strong> ET&amp;T is Boeing's enterprise engineering &amp; test excellence function, led by SVP Howard McKenzie. It sets technical standards, manages Boeing's test infrastructure (labs, rigs, simulators), and drives R&amp;D investment across all three major BUs (BCA, BDS, BGS). ET&amp;T owns the Integrated Defense Systems lab network, structural test facilities, and aeromechanics labs. Unlike the product-line BUs, ET&amp;T hires engineers who work <em>across</em> programs — making it a particularly strong account for systems engineers, simulation engineers, and structural test specialists who don't need program-specific experience.</div>
+
+<div class="loc-grid">
+  <div class="loc-card ett-top"><h3>Seattle, WA <span class="loc-count ett-c">~25+ open</span></h3><div class="lsub">ET&amp;T West — BCA program technical excellence &amp; test labs</div><div class="chip-wrap"><span class="chip hot">Simulation Engineer (6-DOF / Iron Bird)</span><span class="chip hot">Structural Test Engineer</span><span class="chip">Test Systems Engineer</span><span class="chip tech">Research Engineer (Advanced Concepts)</span><span class="chip">Aeromechanics Engineer</span></div></div>
+  <div class="loc-card ett-top"><h3>St. Louis, MO <span class="loc-count ett-c">~15+ open</span></h3><div class="lsub">ET&amp;T East — BDS/BGS technical standards &amp; lab infrastructure</div><div class="chip-wrap"><span class="chip hot">Systems Simulation Engineer</span><span class="chip">Structural Test Engineer</span><span class="chip">Lab Operations Specialist</span><span class="chip tech">Computational Fluids (CFD) Engineer</span></div></div>
+  <div class="loc-card ett-top"><h3>Huntington Beach, CA <span class="loc-count ett-c">~10+ open</span></h3><div class="lsub">ET&amp;T — Space &amp; Defense R&amp;D Lab Support</div><div class="chip-wrap"><span class="chip">Research Engineer</span><span class="chip tech">Propulsion Test Engineer</span><span class="chip">Materials &amp; Process Engineer</span></div></div>
+</div>
+
+<div class="card section-gap">
+  <div class="card-title" style="color:var(--ett);">📋 ET&amp;T — Open Roles &amp; Fit (Horizontal Across BCA / BDS / BGS)</div>
+  <table>
+    <thead><tr style="background:var(--ett);color:#fff;"><th>Role</th><th>BU Impact</th><th>Est. Open</th><th>Fit</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Simulation Engineer (6-DOF / Iron Bird)</strong></td><td>BCA + BDS</td><td>~8–12</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>Flight sim &amp; iron-bird development for 777X and BDS platforms — aligns to Cyient simulation practice</td></tr>
+      <tr><td><strong>Structural Test Engineer</strong></td><td>BCA + Spirit</td><td>~8–12</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>Full-scale static/fatigue test rigs for 737/787/777X structures — FEA + hands-on test experience valued</td></tr>
+      <tr><td><strong>Systems / Integration Test Engineer</strong></td><td>BCA + BGS + BDS</td><td>~10–15</td><td><span class="tag t-yellow">🟡 Good Fit</span></td><td>Cross-program test planning, verification &amp; validation, requirements traceability</td></tr>
+      <tr><td><strong>CFD / Aeromechanics Engineer</strong></td><td>BCA</td><td>~5–8</td><td><span class="tag t-yellow">🟡 Good Fit</span></td><td>Computational fluids for commercial program certification — Fluent/STAR-CCM+ experience preferred</td></tr>
+      <tr><td><strong>Research Engineer (Advanced Concepts)</strong></td><td>BCA + BDS</td><td>~5–8</td><td><span class="tag t-yellow">🟡 Possible</span></td><td>Boeing Research &amp; Technology (BR&amp;T) embedded in ET&amp;T — advanced materials, propulsion, autonomy R&amp;D</td></tr>
+      <tr><td><strong>Lab / Test Facility Operations</strong></td><td>All BUs</td><td>~8–12</td><td><span class="tag t-yellow">🟡 Good Fit</span></td><td>Test rig operation, calibration, instrumentation — lower clearance exposure than BDS test roles</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="top5-head">Top 5 In-Demand Skills / Functions — ET&amp;T (Engineering, Test &amp; Technology)</p>
+<div class="top5-grid">
+  <div class="t5w" style="--c:#b45309">
+    <div class="t5rank">#1 In Demand</div>
+    <div class="t5name">Simulation Engineer (6-DOF)</div>
+    <div class="t5sub">Iron-bird &amp; 6-DOF flight sim development, 777X &amp; BDS platforms, cross-program impact</div>
+    <div class="t5sites">Seattle WA · St. Louis MO</div>
+  </div>
+  <div class="t5w" style="--c:#d97706">
+    <div class="t5rank">#2 In Demand</div>
+    <div class="t5name">Structural Test Engineer</div>
+    <div class="t5sub">Full-scale static/fatigue test rigs, 737/787/777X structures, FEA + hands-on test</div>
+    <div class="t5sites">Seattle WA · Everett WA</div>
+  </div>
+  <div class="t5w" style="--c:#7c2d12">
+    <div class="t5rank">#3 In Demand</div>
+    <div class="t5name">Systems Integration Test Eng.</div>
+    <div class="t5sub">Cross-BU test planning, V&amp;V, requirements traceability — horizontal program exposure</div>
+    <div class="t5sites">Seattle WA · St. Louis MO</div>
+  </div>
+  <div class="t5w" style="--c:#ea580c">
+    <div class="t5rank">#4 In Demand</div>
+    <div class="t5name">CFD / Aeromechanics Engineer</div>
+    <div class="t5sub">Computational fluids for cert, Fluent/STAR-CCM+, commercial program aerodynamics</div>
+    <div class="t5sites">Seattle WA · Huntington Beach CA</div>
+  </div>
+  <div class="t5w" style="--c:#c2410c">
+    <div class="t5rank">#5 In Demand</div>
+    <div class="t5name">Lab / Test Facility Operations</div>
+    <div class="t5sub">Test rig operation, calibration, instrumentation — all BUs, lower clearance barrier</div>
+    <div class="t5sites">Seattle WA · St. Louis MO · Huntington Beach CA</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SECTION: I&A — INFORMATION & ANALYTICS
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="ia"></a>
+<div class="div-header ia-hdr">
+  <div><div class="div-badge">💡 I&amp;A</div></div>
+  <div>
+    <h2>Information &amp; Analytics (I&amp;A)</h2>
+    <div class="div-sub">Horizontal org · Enterprise IT &amp; Digital Transformation &nbsp;·&nbsp; CIO: Dana Deasy &nbsp;·&nbsp; Hazelwood MO · Seattle WA · Virtual</div>
+  </div>
+</div>
+
+<div class="warn-ia">📌 <strong>Context:</strong> I&amp;A is Boeing's enterprise IT and digital transformation organization, led by CIO Dana Deasy. It owns Boeing's cybersecurity posture, enterprise cloud migration (AWS/Azure), SAP S/4HANA transformation, data lake and analytics platforms, and enterprise AI/ML deployment. I&amp;A cuts horizontally across BCA, BDS, and BGS — every IT initiative, data pipeline, and cybersecurity mandate runs through this org. It is the <strong>single strongest Cyient play across all of Boeing</strong>: SAP, data engineering, cloud, and cybersecurity are all core to Cyient's service lines and I&amp;A has active hiring in all four areas.</div>
+
+<div class="loc-grid">
+  <div class="loc-card ia-top"><h3>Hazelwood, MO <span class="loc-count ia-c">~40+ open</span></h3><div class="lsub">Boeing IT Campus — Enterprise Systems &amp; Cybersecurity HQ</div><div class="chip-wrap"><span class="chip hot">Cybersecurity Analyst (Enterprise)</span><span class="chip hot">SAP S/4HANA Consultant</span><span class="chip hot">Cloud Architect (AWS / Azure)</span><span class="chip tech">Data Engineer (Azure Data Lake)</span><span class="chip tech">Enterprise Architect</span><span class="chip">IT Project Manager</span></div></div>
+  <div class="loc-card ia-top"><h3>Seattle, WA <span class="loc-count ia-c">~20+ open</span></h3><div class="lsub">I&amp;A West — BCA digital systems &amp; analytics</div><div class="chip-wrap"><span class="chip hot">AI/ML Engineer (Enterprise)</span><span class="chip tech">Software Engineer (Enterprise IT)</span><span class="chip">Data Scientist / Analyst</span><span class="chip tech">DevOps / Platform Engineer</span></div></div>
+  <div class="loc-card ia-top"><h3>Virtual / Remote <span class="loc-count ia-c">~15+ open</span></h3><div class="lsub">I&amp;A — Remote-eligible digital transformation roles</div><div class="chip-wrap"><span class="chip">IT Program Manager</span><span class="chip tech">Cloud Security Engineer</span><span class="chip tech">Data Governance Specialist</span><span class="chip">SAP Basis / Technical Admin</span></div></div>
+</div>
+
+<div class="card section-gap">
+  <div class="card-title" style="color:var(--ia);">📋 I&amp;A — Open Roles &amp; Fit (CIO Dana Deasy / Horizontal Across All BUs)</div>
+  <table>
+    <thead><tr style="background:var(--ia);color:#fff;"><th>Role</th><th>BU Impact</th><th>Est. Open</th><th>Fit</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><strong>SAP S/4HANA Consultant / Functional Lead</strong></td><td>All BUs (enterprise ERP)</td><td>~10–15</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>Boeing SAP migration to S/4HANA in progress — FI/CO, PP, MM, QM modules all active; Cyient SAP practice is a direct match</td></tr>
+      <tr><td><strong>Cybersecurity Analyst (Enterprise)</strong></td><td>All BUs (enterprise mandate)</td><td>~15–20</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>Boeing enterprise cyber posture hardening post-2024 incidents — SOC analyst, SIEM, Zero Trust roles all active</td></tr>
+      <tr><td><strong>Cloud Architect (AWS / Azure)</strong></td><td>All BUs (cloud migration)</td><td>~10–15</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>Boeing cloud transformation active — enterprise workload migration, data lake architecture, IaaS/PaaS design</td></tr>
+      <tr><td><strong>Data Engineer (Azure Data Lake)</strong></td><td>BCA + BGS + Enterprise</td><td>~10–15</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>Boeing data lake and analytics platform build-out — Spark, Databricks, Azure — Cyient data engineering bench directly applicable</td></tr>
+      <tr><td><strong>AI/ML Engineer (Enterprise)</strong></td><td>All BUs</td><td>~8–12</td><td><span class="tag t-red">🔴 Strong Fit</span></td><td>GenAI, predictive analytics, supply chain AI — Boeing enterprise AI mandate from Deasy. No clearance on most roles.</td></tr>
+      <tr><td><strong>Enterprise Architect</strong></td><td>All BUs</td><td>~5–8</td><td><span class="tag t-yellow">🟡 Good Fit</span></td><td>TOGAF / EA framework — IT strategy across BCA/BDS/BGS enterprise systems</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="top5-head">Top 5 In-Demand Skills / Functions — I&amp;A (Information &amp; Analytics, CIO Dana Deasy)</p>
+<div class="top5-grid">
+  <div class="t5w" style="--c:#0f766e">
+    <div class="t5rank">#1 In Demand</div>
+    <div class="t5name">SAP S/4HANA Consultant</div>
+    <div class="t5sub">FI/CO, PP, MM, QM modules, enterprise ERP migration in progress — strongest Cyient fit across all Boeing</div>
+    <div class="t5sites">Hazelwood MO · Virtual</div>
+  </div>
+  <div class="t5w" style="--c:#059669">
+    <div class="t5rank">#2 In Demand</div>
+    <div class="t5name">Cybersecurity Analyst</div>
+    <div class="t5sub">Enterprise SOC, SIEM, Zero Trust, cloud security — Boeing-wide mandate post-2024 incidents</div>
+    <div class="t5sites">Hazelwood MO · Virtual</div>
+  </div>
+  <div class="t5w" style="--c:#064e3b">
+    <div class="t5rank">#3 In Demand</div>
+    <div class="t5name">Cloud Architect (AWS / Azure)</div>
+    <div class="t5sub">Enterprise workload migration, data lake architecture, IaaS/PaaS design — cross-BU transformation</div>
+    <div class="t5sites">Hazelwood MO · Seattle WA</div>
+  </div>
+  <div class="t5w" style="--c:#10b981">
+    <div class="t5rank">#4 In Demand</div>
+    <div class="t5name">Data Engineer (Azure Data Lake)</div>
+    <div class="t5sub">Spark, Databricks, Azure — Boeing data lake build-out, analytics platform, Cyient data bench fit</div>
+    <div class="t5sites">Hazelwood MO · Seattle WA · Virtual</div>
+  </div>
+  <div class="t5w" style="--c:#34d399">
+    <div class="t5rank">#5 In Demand</div>
+    <div class="t5name">AI/ML Engineer (Enterprise)</div>
+    <div class="t5sub">GenAI, predictive analytics, supply chain AI — Deasy enterprise AI mandate, no clearance on most roles</div>
+    <div class="t5sites">Seattle WA · Hazelwood MO · Virtual</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     CERTIFICATIONS
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="certs"></a>
+<div class="card section-gap">
+  <div class="card-title">🏅 Key Certifications &amp; Methodologies — Contractor Must-Haves Across All Divisions</div>
+  <table>
+    <thead><tr><th>Certification</th><th>Relevant Divisions</th><th>Key Roles</th><th>Priority</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Lean Manufacturing</strong></td><td>BCA · Spirit · Insitu</td><td>Manufacturing Eng., Industrial Eng., Operations Mgr</td><td><span class="tag t-red">Must Have</span></td></tr>
+      <tr><td><strong>Six Sigma (Green/Black Belt)</strong></td><td>BCA · Spirit · BGS</td><td>Quality Engineer, Manufacturing Manager</td><td><span class="tag t-red">Must Have</span></td></tr>
+      <tr><td><strong>AS9100 Quality Standard</strong></td><td>BCA · Spirit · BGS · Insitu</td><td>Quality Engineer, Compliance Analyst, Structural Eng.</td><td><span class="tag t-red">Must Have</span></td></tr>
+      <tr><td><strong>First Article Inspection (FAI)</strong></td><td>BCA · Spirit · Insitu</td><td>Quality Engineer, Structural Engineer</td><td><span class="tag t-yellow">Preferred</span></td></tr>
+      <tr><td><strong>CATIA V5/V6</strong></td><td>BCA · BIETC India · BETC Brazil · Aurora</td><td>Structures Design Eng., Technical Designer, CAD Eng.</td><td><span class="tag t-yellow">Preferred</span></td></tr>
+      <tr><td><strong>FAA Regulatory Compliance</strong></td><td>BCA · Wisk · Spirit · Aurora</td><td>All Engineering &amp; Production roles</td><td><span class="tag t-red">Must Have</span></td></tr>
+      <tr><td><strong>DO-178C (Avionics SW)</strong></td><td>Wisk Aero · BCA · Aurora</td><td>Avionics Software Engineer, Controls Engineer</td><td><span class="tag t-yellow">Required for Wisk/Aurora</span></td></tr>
+      <tr><td><strong>SAP FI/CO / MM / QM / PP</strong></td><td>BDS · BGS · BIETC</td><td>SAP Functional Analyst, Finance Analyst</td><td><span class="tag t-yellow">BDS HQ Priority</span></td></tr>
+      <tr><td><strong>MBSE (Model-Based Systems Eng.)</strong></td><td>BIETC India · BCA · Aurora</td><td>Systems Engineering Manager, SE Integrator</td><td><span class="tag t-yellow">Preferred (India + Aurora)</span></td></tr>
+      <tr><td><strong>S1000D / IETM Authoring</strong></td><td>Aurora · Insitu · BCA</td><td>Technical Writer, ILS Specialist, Publications Eng.</td><td><span class="tag t-teal">Aurora/Insitu Entry Point</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     CYIENT PROOF POINTS
+════════════════════════════════════════════════ -->
+<a class="section-anchor" id="cyient"></a>
+<div class="card" style="border-top:4px solid #2e7d32;margin-bottom:20px;">
+  <div class="card-title">🏆 Proof Points — Use in Every Boeing Outreach</div>
+  <div class="g3">
+    <div class="warn-green" style="margin:0;"><div style="font-weight:700;font-size:13px;margin-bottom:6px;">🥇 Boeing PE Award</div>Silver Boeing Performance Excellence Award — sustained high performance for full 12-month period. Opens every conversation.</div>
+    <div class="warn-green" style="margin:0;"><div style="font-weight:700;font-size:13px;margin-bottom:6px;">🔩 DLM × Boeing Global Services</div>DLM signed precision machining production contract with BGS (Feb 2025). Active Boeing relationship — warm intro to BCA and BDS staffing.</div>
+    <div class="warn-green" style="margin:0;"><div style="font-weight:700;font-size:13px;margin-bottom:6px;">⚡ 50+ Engineers in Seattle in 2–3 Months</div>Proven ramp speed in Puget Sound. For a TA team under deadline pressure, this is the only proof point that matters. Use for BCA Everett &amp; Renton outreach.</div>
+    <div class="warn-green" style="margin:0;"><div style="font-weight:700;font-size:13px;margin-bottom:6px;">✈️ 42M+ Hours Aerospace Engineering</div>Delivered to global aerospace clients. CATIA, MATLAB, Python, Lean, AS9100, NADCAP — covers the majority of Boeing's fast-sell skill list across BCA, BDS, and BIETC.</div>
+    <div class="warn-green" style="margin:0;"><div style="font-weight:700;font-size:13px;margin-bottom:6px;">🇮🇳 Bengaluru Engineering Center</div>Direct alignment with BIETC's AI/ML, SAP, Systems Eng., and Full-Stack needs. Position as Boeing's local Bengaluru talent partner.</div>
+    <div class="warn-green" style="margin:0;"><div style="font-weight:700;font-size:13px;margin-bottom:6px;">🏅 AS9100 &amp; NADCAP Certified</div>First in India to obtain NADCAP CCA certification. Signals Boeing-grade quality culture — use for all Spirit, BCA, Aurora, Insitu, and BDS quality-sensitive pitches.</div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<div id="page-footer">Sales Intelligence &bull; Boeing Corporation (BCA / BT&amp;E / BGS / BDS / Spirit / BIETC / BETC / Wisk / AvionX / Aurora / Insitu / ET&amp;T / I&amp;A) &bull; Confidential &bull; <span id="page-footer-date"></span></div>
+
+<script>
+// Date badges
+const _now = new Date();
+const _opts = {year:'numeric',month:'long',day:'numeric'};
+document.getElementById('topbar-date').textContent = '📅 ' + _now.toLocaleDateString('en-US',_opts);
+document.getElementById('page-footer-date').textContent = _now.toLocaleDateString('en-US',_opts);
+
+// Location bar chart
+new Chart(document.getElementById('locChart').getContext('2d'),{
+  type:'bar',
+  data:{
+    labels:['Seattle WA','California','Everett WA','Renton WA','Bengaluru IN','Wichita KS','N.Charleston SC','St. Louis MO','Cambridge MA','El Segundo CA','Denver CO','Bingen WA','San Diego CA','Dallas TX','São José BR'],
+    datasets:[
+      {label:'Still Open',data:[351,233,150,115,90,70,39,50,35,25,12,30,18,12,10],backgroundColor:'rgba(197,28,28,0.8)',borderRadius:4},
+      {label:'Filled',data:[175,90,50,65,40,37,23,10,15,5,3,10,7,8,5],backgroundColor:'rgba(0,85,165,0.7)',borderRadius:4}
+    ]
+  },
+  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11}}},tooltip:{mode:'index',intersect:false}},scales:{x:{stacked:true,ticks:{font:{size:10}}},y:{stacked:true,ticks:{font:{size:10}}}}}
+});
+
+// Division doughnut
+new Chart(document.getElementById('divChart').getContext('2d'),{
+  type:'doughnut',
+  data:{
+    labels:['BCA','Spirit','International','BGS','BDS','Wisk/AvionX','Aurora','Insitu'],
+    datasets:[{
+      data:[921,70,100,45,75,30,35,30],
+      backgroundColor:['rgba(0,85,165,0.85)','rgba(184,92,0,0.85)','rgba(21,101,192,0.85)','rgba(0,121,107,0.85)','rgba(106,27,154,0.85)','rgba(198,40,40,0.75)','rgba(14,116,144,0.85)','rgba(55,48,163,0.85)'],
+      borderWidth:2,borderColor:'#fff',hoverOffset:6
+    }]
+  },
+  options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right',labels:{font:{size:10},padding:8}}}}
+});
+
+// Sidebar active link on scroll
+const _sections = document.querySelectorAll('.section-anchor');
+const _navLinks = document.querySelectorAll('.sidenav a');
+window.addEventListener('scroll',()=>{
+  let current='';
+  _sections.forEach(s=>{if(window.scrollY>=s.offsetTop-80)current=s.id;});
+  _navLinks.forEach(a=>{
+    a.classList.remove('active');
+    if(a.getAttribute('href')==='#'+current)a.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
