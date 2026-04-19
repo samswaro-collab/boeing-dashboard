@@ -1,0 +1,51 @@
+{
+  "meta": {
+    "lastRefreshed": "2026-04-19T17:19:51Z",
+    "nextRefresh": "2026-04-24T17:19:51Z",
+    "sources": "BEAKON baseline",
+    "generatedBy": "GitHub Actions"
+  },
+  "boeing": {
+    "bca": {
+      "total": 921,
+      "source": "baseline"
+    },
+    "bgs": {
+      "total": 50,
+      "source": "baseline"
+    },
+    "bds": {
+      "total": 75,
+      "source": "baseline"
+    },
+    "spirit": {
+      "total": 107,
+      "source": "baseline"
+    },
+    "bietc": {
+      "total": 145,
+      "source": "baseline"
+    },
+    "betc": {
+      "total": 30,
+      "source": "baseline"
+    },
+    "wisk": {
+      "total": 52,
+      "source": "baseline"
+    },
+    "avionx": {
+      "total": 10,
+      "source": "baseline"
+    },
+    "aurora": {
+      "total": 60,
+      "source": "baseline"
+    },
+    "insitu": {
+      "total": 50,
+      "source": "baseline"
+    },
+    "totalRoles": 1450
+  }
+}
